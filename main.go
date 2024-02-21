@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
@@ -14,29 +15,30 @@ import (
 type Post struct {
 	Id      uint
 	Name    string
-	content string
+	Content string
 }
 
 type PostRepo struct {
 	sync.Mutex
-	list    []Post
+	store   map[uint]*Post
 	counter uint
 }
 
 func NewPostRepo() *PostRepo {
-	return &PostRepo{
-		list:    []Post{},
+	repo := PostRepo{
 		counter: 0,
 	}
+	repo.store = make(map[uint]*Post)
+	return &repo
 }
 
-func (pr *PostRepo) addPost(post Post) error {
+func (pr *PostRepo) addPost(post *Post) error {
 	pr.Lock()
 	defer pr.Unlock()
 
-	pr.list = append(pr.list, post)
+	log.Info().Msg(post.Name)
+	pr.store[pr.counter] = post
 	pr.counter++
-	zerolog.TimeFieldFormat = zerolog.TimestampFieldName
 	log.Info().Msg("post has been added")
 	return nil
 }
@@ -47,9 +49,9 @@ func (pr *PostRepo) getPost(id uint) (Post, error) {
 
 	var post Post
 	found := false
-	for _, v := range pr.list {
+	for _, v := range pr.store {
 		if v.Id == id {
-			post = v
+			post = *v
 			found = true
 			break
 		}
@@ -66,11 +68,11 @@ func (pr *PostRepo) updatePost(id uint, newPost *updatePostRequest) (Post, error
 
 	var post Post
 	found := false
-	for i, v := range pr.list {
+	for i, v := range pr.store {
 		if v.Id == id {
-			pr.list[i].Name = newPost.Name
+			pr.store[i].Name = newPost.Name
 			found = true
-			post = pr.list[i]
+			post = *pr.store[i]
 			break
 		}
 	}
@@ -87,10 +89,10 @@ func (pr *PostRepo) deletePost(id uint) (Post, error) {
 
 	var post Post
 	found := false
-	for i, v := range pr.list {
+	for i, v := range pr.store {
 		if v.Id == id {
-			post = pr.list[i]
-			pr.list = append(pr.list[0:i], pr.list[i+1:]...)
+			post = *pr.store[i]
+			delete(pr.store, i)
 			found = true
 			break
 		}
@@ -120,7 +122,7 @@ type updatePostRequest struct {
 
 func (ph *PostHandler) getPostsHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"post": ph.Repo.list,
+		"post": ph.Repo.store,
 	})
 }
 func (ph *PostHandler) getPostHandler(c echo.Context) error {
@@ -194,10 +196,16 @@ func (ph *PostHandler) deletePostHandler(c echo.Context) error {
 
 func (ph *PostHandler) addPostHandler(c echo.Context) error {
 	productRequest := &addPostRequest{}
-	c.Bind(productRequest)
+	err := c.Bind(productRequest)
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
 
 	// add item to productRepo
-	newPost := Post{
+	newPost := &Post{
 		Id:   ph.Repo.counter,
 		Name: productRequest.Name,
 	}
@@ -210,7 +218,10 @@ func (ph *PostHandler) addPostHandler(c echo.Context) error {
 }
 
 func main() {
-	PostRepo := new(PostRepo)
+	zerolog.TimeFieldFormat = zerolog.TimestampFieldName
+
+	PostRepo := NewPostRepo()
+	fmt.Println(PostRepo.store)
 	PostHandler := NewPostHandler(PostRepo)
 	e := echo.New()
 
