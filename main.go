@@ -42,6 +42,9 @@ func (pr *PostRepo) addPost(post Post) error {
 }
 
 func (pr *PostRepo) getPost(id uint) (Post, error) {
+	pr.Lock()
+	defer pr.Unlock()
+
 	var post Post
 	found := false
 	for _, v := range pr.list {
@@ -58,6 +61,9 @@ func (pr *PostRepo) getPost(id uint) (Post, error) {
 }
 
 func (pr *PostRepo) updatePost(id uint, newPost *updatePostRequest) (Post, error) {
+	pr.Lock()
+	defer pr.Unlock()
+
 	var post Post
 	found := false
 	for i, v := range pr.list {
@@ -76,6 +82,9 @@ func (pr *PostRepo) updatePost(id uint, newPost *updatePostRequest) (Post, error
 }
 
 func (pr *PostRepo) deletePost(id uint) (Post, error) {
+	pr.Lock()
+	defer pr.Unlock()
+
 	var post Post
 	found := false
 	for i, v := range pr.list {
