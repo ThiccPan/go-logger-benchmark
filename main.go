@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"sync"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -47,40 +49,25 @@ func (pr *PostRepo) getPost(id uint) (Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
 
-	var post Post
-	found := false
-	for _, v := range pr.store {
-		if v.Id == id {
-			post = *v
-			found = true
-			break
-		}
-	}
+	post, found := pr.store[id]
+	log.Info().Msg("fetching post successfully")
 	if !found {
 		return Post{}, errors.New("post not found")
 	}
-	return post, nil
+	return *post, nil
 }
 
 func (pr *PostRepo) updatePost(id uint, newPost *updatePostRequest) (Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
 
-	var post Post
-	found := false
-	for i, v := range pr.store {
-		if v.Id == id {
-			pr.store[i].Name = newPost.Name
-			found = true
-			post = *pr.store[i]
-			break
-		}
-	}
+	post, found := pr.store[id]
+	log.Info().Msg("fetching post successfully")
 	if !found {
 		return Post{}, errors.New("post not found")
 	}
 	log.Info().Msg("update post successfully")
-	return post, nil
+	return *post, nil
 }
 
 func (pr *PostRepo) deletePost(id uint) (Post, error) {
@@ -121,6 +108,7 @@ type updatePostRequest struct {
 }
 
 func (ph *PostHandler) getPostsHandler(c echo.Context) error {
+	log.Info().Msg("fetching all posts")
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"post": ph.Repo.store,
 	})
@@ -128,6 +116,7 @@ func (ph *PostHandler) getPostsHandler(c echo.Context) error {
 func (ph *PostHandler) getPostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		log.Warn().Msg("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "invalid id, use integer id",
 		})
@@ -148,6 +137,7 @@ func (ph *PostHandler) getPostHandler(c echo.Context) error {
 func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		log.Warn().Msg("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "invalid id, use integer id",
 		})
@@ -177,6 +167,7 @@ func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 func (ph *PostHandler) deletePostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		log.Warn().Msg("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "invalid id, use integer id",
 		})
@@ -218,14 +209,34 @@ func (ph *PostHandler) addPostHandler(c echo.Context) error {
 }
 
 func main() {
+	e := echo.New()
+
+	// configure logger
+	logFile, err := os.OpenFile("./log-history.txt", os.O_RDWR, 0644)
+	if err != nil {
+		panic(1)
+	}
+
 	zerolog.TimeFieldFormat = zerolog.TimestampFieldName
+	log.Logger = log.Output(logFile)
+	log.Logger = log.With().Caller().Logger()
+
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogURI:    true,
+		LogStatus: true,
+		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
+			log.Info().
+				Str("URI", v.URI).
+				Int("status", v.Status).
+				Msg("request")
+
+			return nil
+		},
+	}))
 
 	PostRepo := NewPostRepo()
 	fmt.Println(PostRepo.store)
 	PostHandler := NewPostHandler(PostRepo)
-	e := echo.New()
-
-	e.GET("/", func(c echo.Context) error { return c.JSON(http.StatusOK, map[string]interface{}{"online": "online"}) })
 
 	e.POST("/posts", PostHandler.addPostHandler)
 	e.GET("/posts", PostHandler.getPostsHandler)
