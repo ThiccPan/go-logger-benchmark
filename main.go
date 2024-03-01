@@ -57,7 +57,7 @@ func (pr *PostRepo) getPost(id uint) (Post, error) {
 	return *post, nil
 }
 
-func (pr *PostRepo) updatePost(id uint, newPost *updatePostRequest) (Post, error) {
+func (pr *PostRepo) updatePost(id uint, newPost *Post) (Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
 
@@ -66,8 +66,16 @@ func (pr *PostRepo) updatePost(id uint, newPost *updatePostRequest) (Post, error
 	if !found {
 		return Post{}, errors.New("post not found")
 	}
+
+	if newPost.Name == "" {
+		newPost.Name = post.Name
+	}
+	if newPost.Content == "" {
+		newPost.Content = post.Content
+	}
+	pr.store[id] = newPost
 	log.Info().Msg("update post successfully")
-	return *post, nil
+	return *pr.store[id], nil
 }
 
 func (pr *PostRepo) deletePost(id uint) (Post, error) {
@@ -100,11 +108,13 @@ func NewPostHandler(repo *PostRepo) *PostHandler {
 }
 
 type addPostRequest struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	Content string `json:"content"`
 }
 
 type updatePostRequest struct {
-	Name string `json:"name"`
+	Name    string `json:"name"`
+	Content string `json:"content"`
 }
 
 func (ph *PostHandler) getPostsHandler(c echo.Context) error {
@@ -144,7 +154,6 @@ func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 	}
 
 	request := &updatePostRequest{}
-
 	err = c.Bind(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -152,7 +161,12 @@ func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 		})
 	}
 
-	post, err := ph.Repo.updatePost(uint(id), request)
+	newPost := &Post{
+		Id: ph.Repo.counter,
+		Name: request.Name,
+		Content: request.Content,
+	}
+	post, err := ph.Repo.updatePost(uint(id), newPost)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": err.Error(),
@@ -197,8 +211,9 @@ func (ph *PostHandler) addPostHandler(c echo.Context) error {
 
 	// add item to productRepo
 	newPost := &Post{
-		Id:   ph.Repo.counter,
-		Name: productRequest.Name,
+		Id:      ph.Repo.counter,
+		Name:    productRequest.Name,
+		Content: productRequest.Content,
 	}
 	ph.Repo.addPost(newPost)
 
