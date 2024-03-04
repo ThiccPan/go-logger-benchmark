@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"strconv"
@@ -101,10 +100,11 @@ func (pr *PostRepo) deletePost(id uint) (Post, error) {
 
 type PostHandler struct {
 	Repo *PostRepo
+	logger Ilogger
 }
 
-func NewPostHandler(repo *PostRepo) *PostHandler {
-	return &PostHandler{Repo: repo}
+func NewPostHandler(repo *PostRepo, logger Ilogger) *PostHandler {
+	return &PostHandler{Repo: repo, logger: logger}
 }
 
 type addPostRequest struct {
@@ -162,8 +162,8 @@ func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 	}
 
 	newPost := &Post{
-		Id: ph.Repo.counter,
-		Name: request.Name,
+		Id:      ph.Repo.counter,
+		Name:    request.Name,
 		Content: request.Content,
 	}
 	post, err := ph.Repo.updatePost(uint(id), newPost)
@@ -217,6 +217,7 @@ func (ph *PostHandler) addPostHandler(c echo.Context) error {
 	}
 	ph.Repo.addPost(newPost)
 
+	ph.logger.logInfo("successfully adding new post")
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "successfully adding new post",
 		"post":    newPost,
@@ -250,8 +251,8 @@ func main() {
 	}))
 
 	PostRepo := NewPostRepo()
-	fmt.Println(PostRepo.store)
-	PostHandler := NewPostHandler(PostRepo)
+	zapLogger := InitZap()
+	PostHandler := NewPostHandler(PostRepo, zapLogger)
 
 	e.POST("/posts", PostHandler.addPostHandler)
 	e.GET("/posts", PostHandler.getPostsHandler)
