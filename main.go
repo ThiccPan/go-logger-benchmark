@@ -227,7 +227,7 @@ func main() {
 	e := echo.New()
 
 	// configure logger
-	logFile, err := os.OpenFile("./log-history.txt", os.O_RDWR, 0644)
+	logFile, err := os.OpenFile("./log-history.log", os.O_RDWR, 0644)
 	if err != nil {
 		panic(1)
 	}
