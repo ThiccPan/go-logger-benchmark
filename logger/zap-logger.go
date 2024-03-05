@@ -1,13 +1,14 @@
-package main
+package logger
 
-import "go.uber.org/zap"
+import (
+	"go.uber.org/zap"
+)
 
 type ZapLogger struct {
 	log *zap.Logger
 }
 
 // logErr implements Ilogger.
-
 func InitZap() ZapLogger {
 	logger := zap.Must(zap.NewProduction())
 	// defer logger.Sync()
@@ -16,10 +17,10 @@ func InitZap() ZapLogger {
 	return a
 }
 
-func (zlog ZapLogger) logInfo(msg string) {
+func (zlog ZapLogger) LogInfo(msg string) {
 	zlog.log.Info(msg)
 }
 
-func (zlog ZapLogger) logErr(msg string) {
+func (zlog ZapLogger) LogErr(msg string) {
 	zlog.log.Error(msg)
 }
