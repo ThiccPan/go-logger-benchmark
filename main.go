@@ -3,14 +3,11 @@ package main
 import (
 	"errors"
 	"net/http"
-	"os"
 	"strconv"
 	"sync"
 
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/thiccpan/go-logger-benchmark/logger"
 )
 
 type Post struct {
@@ -22,14 +19,16 @@ type Post struct {
 type PostRepo struct {
 	sync.Mutex
 	store   map[uint]*Post
+	logger  logger.Ilogger
 	counter uint
 }
 
-func NewPostRepo() *PostRepo {
+func NewPostRepo(logger logger.Ilogger) *PostRepo {
 	repo := PostRepo{
+		store:   make(map[uint]*Post),
+		logger:  logger,
 		counter: 0,
 	}
-	repo.store = make(map[uint]*Post)
 	return &repo
 }
 
@@ -37,10 +36,10 @@ func (pr *PostRepo) addPost(post *Post) error {
 	pr.Lock()
 	defer pr.Unlock()
 
-	log.Info().Msg(post.Name)
+	pr.logger.LogInfo(post.Name)
 	pr.store[pr.counter] = post
 	pr.counter++
-	log.Info().Msg("post has been added")
+	pr.logger.LogInfo("post has been added")
 	return nil
 }
 
@@ -49,7 +48,7 @@ func (pr *PostRepo) getPost(id uint) (Post, error) {
 	defer pr.Unlock()
 
 	post, found := pr.store[id]
-	log.Info().Msg("fetching post successfully")
+	pr.logger.LogInfo("fetching post successfully")
 	if !found {
 		return Post{}, errors.New("post not found")
 	}
@@ -61,7 +60,7 @@ func (pr *PostRepo) updatePost(id uint, newPost *Post) (Post, error) {
 	defer pr.Unlock()
 
 	post, found := pr.store[id]
-	log.Info().Msg("fetching post successfully")
+	pr.logger.LogInfo("fetching post successfully")
 	if !found {
 		return Post{}, errors.New("post not found")
 	}
@@ -73,7 +72,7 @@ func (pr *PostRepo) updatePost(id uint, newPost *Post) (Post, error) {
 		newPost.Content = post.Content
 	}
 	pr.store[id] = newPost
-	log.Info().Msg("update post successfully")
+	pr.logger.LogInfo("update post successfully")
 	return *pr.store[id], nil
 }
 
@@ -94,16 +93,16 @@ func (pr *PostRepo) deletePost(id uint) (Post, error) {
 	if !found {
 		return Post{}, errors.New("post not found")
 	}
-	log.Info().Msg("delete post successfully")
+	pr.logger.LogInfo("delete post successfully")
 	return post, nil
 }
 
 type PostHandler struct {
-	Repo *PostRepo
-	logger Ilogger
+	Repo   *PostRepo
+	logger logger.Ilogger
 }
 
-func NewPostHandler(repo *PostRepo, logger Ilogger) *PostHandler {
+func NewPostHandler(repo *PostRepo, logger logger.Ilogger) *PostHandler {
 	return &PostHandler{Repo: repo, logger: logger}
 }
 
@@ -118,7 +117,7 @@ type updatePostRequest struct {
 }
 
 func (ph *PostHandler) getPostsHandler(c echo.Context) error {
-	log.Info().Msg("fetching all posts")
+	ph.logger.LogInfo("fetching all posts")
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"post": ph.Repo.store,
 	})
@@ -126,7 +125,7 @@ func (ph *PostHandler) getPostsHandler(c echo.Context) error {
 func (ph *PostHandler) getPostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		log.Warn().Msg("failed to convert id")
+		ph.logger.LogInfo("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "invalid id, use integer id",
 		})
@@ -147,7 +146,7 @@ func (ph *PostHandler) getPostHandler(c echo.Context) error {
 func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		log.Warn().Msg("failed to convert id")
+		ph.logger.LogInfo("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "invalid id, use integer id",
 		})
@@ -181,7 +180,7 @@ func (ph *PostHandler) updatePostHandler(c echo.Context) error {
 func (ph *PostHandler) deletePostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		log.Warn().Msg("failed to convert id")
+		ph.logger.LogInfo("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"error": "invalid id, use integer id",
 		})
@@ -217,7 +216,7 @@ func (ph *PostHandler) addPostHandler(c echo.Context) error {
 	}
 	ph.Repo.addPost(newPost)
 
-	ph.logger.logInfo("successfully adding new post")
+	ph.logger.LogInfo("successfully adding new post")
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message": "successfully adding new post",
 		"post":    newPost,
@@ -228,30 +227,10 @@ func main() {
 	e := echo.New()
 
 	// configure logger
-	logFile, err := os.OpenFile("./log-history.txt", os.O_RDWR, 0644)
-	if err != nil {
-		panic(1)
-	}
 
-	zerolog.TimeFieldFormat = zerolog.TimestampFieldName
-	log.Logger = log.Output(logFile)
-	log.Logger = log.With().Caller().Logger()
+	zapLogger := logger.InitZap()
 
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			log.Info().
-				Str("URI", v.URI).
-				Int("status", v.Status).
-				Msg("request")
-
-			return nil
-		},
-	}))
-
-	PostRepo := NewPostRepo()
-	zapLogger := InitZap()
+	PostRepo := NewPostRepo(zapLogger)
 	PostHandler := NewPostHandler(PostRepo, zapLogger)
 
 	e.POST("/posts", PostHandler.addPostHandler)
