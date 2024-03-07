@@ -14,35 +14,35 @@ type ZapLogger struct {
 // logErr implements Ilogger.
 func InitZap() ZapLogger {
 	encoderCfg := zap.NewProductionEncoderConfig()
-    encoderCfg.TimeKey = "timestamp"
-    encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderCfg.TimeKey = "timestamp"
+	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 
-    config := zap.Config{
-        Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
-        Development:       false,
-        DisableCaller:     false,
-        DisableStacktrace: false,
-        Sampling:          nil,
-        Encoding:          "json",
-        EncoderConfig:     encoderCfg,
-        OutputPaths: []string{
-            "stderr",
+	config := zap.Config{
+		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
+		Development:       false,
+		DisableCaller:     false,
+		DisableStacktrace: false,
+		Sampling:          nil,
+		Encoding:          "json",
+		EncoderConfig:     encoderCfg,
+		OutputPaths: []string{
+			"stderr",
 			"log-history.log",
-        },
-        ErrorOutputPaths: []string{
-            "stderr",
+		},
+		ErrorOutputPaths: []string{
+			"stderr",
 			"log-history.log",
-        },
-        InitialFields: map[string]interface{}{
-            "pid": os.Getpid(),
-        },
-    }
+		},
+		InitialFields: map[string]interface{}{
+			"pid": os.Getpid(),
+		},
+	}
 
 	logger := &ZapLogger{
 		log: zap.Must(config.Build()),
 	}
 
-    return *logger
+	return *logger
 }
 
 func (zlog ZapLogger) LogInfo(msg string) {

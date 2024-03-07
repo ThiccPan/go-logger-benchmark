@@ -2,3 +2,4 @@ log-history.txt
 go-logger-benchmark
 summary.json
 test.json
+*.log
