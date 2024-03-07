@@ -34,6 +34,7 @@ func (pr *PostRepo) AddPost(post *Post) error {
 	defer pr.Unlock()
 
 	pr.logger.LogInfo(post.Name)
+	post.Id = pr.counter
 	pr.store[pr.counter] = post
 	pr.counter++
 	pr.logger.LogInfo("post has been added")

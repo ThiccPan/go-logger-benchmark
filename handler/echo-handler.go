@@ -30,8 +30,14 @@ type updatePostRequest struct {
 
 func (ph *PostHandler) GetPostsHandler(c echo.Context) error {
 	ph.logger.LogInfo("fetching all posts")
+	posts, err := ph.Repo.GetPosts()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"error": err.Error(),
+		})
+	}
 	return c.JSON(http.StatusOK, map[string]interface{}{
-		"post": ph.Repo,
+		"post": posts,
 	})
 }
 func (ph *PostHandler) GetPostHandler(c echo.Context) error {
