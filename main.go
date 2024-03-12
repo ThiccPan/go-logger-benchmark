@@ -12,10 +12,11 @@ func main() {
 
 	// configure logger
 
-	zapLogger := logger.InitZap()
+	logger := logger.InitZap()
+	// logger := logger.InitZerolog()
 
-	PostRepo := repository.NewPostRepo(zapLogger)
-	PostHandler := handler.NewPostHandler(PostRepo, zapLogger)
+	PostRepo := repository.NewPostRepo(logger)
+	PostHandler := handler.NewPostHandler(PostRepo, logger)
 
 	e.POST("/posts", PostHandler.AddPostHandler)
 	e.GET("/posts", PostHandler.GetPostsHandler)

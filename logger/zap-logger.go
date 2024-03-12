@@ -14,13 +14,14 @@ type ZapLogger struct {
 // logErr implements Ilogger.
 func InitZap() ZapLogger {
 	encoderCfg := zap.NewProductionEncoderConfig()
-	encoderCfg.TimeKey = "timestamp"
+	encoderCfg.TimeKey = "time"
+	encoderCfg.MessageKey = "message"
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
 
 	config := zap.Config{
 		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
 		Development:       false,
-		DisableCaller:     false,
+		DisableCaller:     true,
 		DisableStacktrace: false,
 		Sampling:          nil,
 		Encoding:          "json",
