@@ -53,3 +53,15 @@ func (zlog ZapLogger) LogInfo(msg string) {
 func (zlog ZapLogger) LogErr(msg string) {
 	zlog.log.Error(msg)
 }
+
+func (zlog ZapLogger) LogDebug(msg string) {
+	zlog.log.Debug(msg)
+}
+
+func (zlog ZapLogger) LogWarn(msg string) {
+	zlog.log.Warn(msg)
+}
+
+func (zlog ZapLogger) LogFatal(msg string) {
+	zlog.log.Fatal(msg)
+}
