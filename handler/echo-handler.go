@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/labstack/echo/v4"
+	"github.com/thiccpan/go-logger-benchmark/domain"
 	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 )
@@ -78,7 +79,7 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 		})
 	}
 
-	newPost := &repository.Post{
+	newPost := &domain.Post{
 		Name:    request.Name,
 		Content: request.Content,
 	}
@@ -126,7 +127,7 @@ func (ph *PostHandler) AddPostHandler(c echo.Context) error {
 	}
 
 	// add item to productRepo
-	newPost := &repository.Post{
+	newPost := &domain.Post{
 		Name:    productRequest.Name,
 		Content: productRequest.Content,
 	}

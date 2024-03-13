@@ -4,32 +4,27 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/thiccpan/go-logger-benchmark/domain"
 	"github.com/thiccpan/go-logger-benchmark/logger"
 )
 
-type Post struct {
-	Id      uint
-	Name    string
-	Content string
-}
-
 type PostRepo struct {
 	sync.Mutex
-	store   map[uint]*Post
+	store   map[uint]*domain.Post
 	logger  logger.Ilogger
 	counter uint
 }
 
 func NewPostRepo(logger logger.Ilogger) *PostRepo {
 	repo := PostRepo{
-		store:   make(map[uint]*Post),
+		store:   make(map[uint]*domain.Post),
 		logger:  logger,
 		counter: 0,
 	}
 	return &repo
 }
 
-func (pr *PostRepo) AddPost(post *Post) error {
+func (pr *PostRepo) AddPost(post *domain.Post) error {
 	pr.Lock()
 	defer pr.Unlock()
 
@@ -41,36 +36,36 @@ func (pr *PostRepo) AddPost(post *Post) error {
 	return nil
 }
 
-func (pr *PostRepo) GetPosts() ([]Post, error) {
+func (pr *PostRepo) GetPosts() ([]domain.Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
-	var posts []Post
+	var posts []domain.Post
 	for _, post := range pr.store {
 		posts = append(posts, *post)
 	}
 	return posts, nil
 }
 
-func (pr *PostRepo) GetPost(id uint) (Post, error) {
+func (pr *PostRepo) GetPost(id uint) (domain.Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
 
 	post, found := pr.store[id]
 	pr.logger.LogInfo("fetching post successfully")
 	if !found {
-		return Post{}, errors.New("post not found")
+		return domain.Post{}, errors.New("post not found")
 	}
 	return *post, nil
 }
 
-func (pr *PostRepo) UpdatePost(id uint, newPost *Post) (Post, error) {
+func (pr *PostRepo) UpdatePost(id uint, newPost *domain.Post) (domain.Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
 
 	post, found := pr.store[id]
 	pr.logger.LogInfo("fetching post successfully")
 	if !found {
-		return Post{}, errors.New("post not found")
+		return domain.Post{}, errors.New("post not found")
 	}
 
 	if newPost.Name == "" {
@@ -84,11 +79,11 @@ func (pr *PostRepo) UpdatePost(id uint, newPost *Post) (Post, error) {
 	return *pr.store[id], nil
 }
 
-func (pr *PostRepo) DeletePost(id uint) (Post, error) {
+func (pr *PostRepo) DeletePost(id uint) (domain.Post, error) {
 	pr.Lock()
 	defer pr.Unlock()
 
-	var post Post
+	var post domain.Post
 	found := false
 	for i, v := range pr.store {
 		if v.Id == id {
@@ -99,7 +94,7 @@ func (pr *PostRepo) DeletePost(id uint) (Post, error) {
 		}
 	}
 	if !found {
-		return Post{}, errors.New("post not found")
+		return domain.Post{}, errors.New("post not found")
 	}
 	pr.logger.LogInfo("delete post successfully")
 	return post, nil
