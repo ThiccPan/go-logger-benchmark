@@ -11,11 +11,11 @@ import (
 )
 
 type PostHandler struct {
-	Repo   *repository.PostRepo
+	Repo   repository.IPostRepo
 	logger logger.Ilogger
 }
 
-func NewPostHandler(repo *repository.PostRepo, logger logger.Ilogger) *PostHandler {
+func NewPostHandler(repo repository.IPostRepo, logger logger.Ilogger) *PostHandler {
 	return &PostHandler{Repo: repo, logger: logger}
 }
 
