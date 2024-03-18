@@ -2,6 +2,6 @@ package domain
 
 type Post struct {
 	Id      uint
-	Name    string
+	Title   string
 	Content string
 }

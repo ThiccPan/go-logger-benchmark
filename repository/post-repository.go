@@ -28,7 +28,7 @@ func (pr *PostRepo) AddPost(post *domain.Post) error {
 	pr.Lock()
 	defer pr.Unlock()
 
-	pr.logger.LogInfo(post.Name)
+	pr.logger.LogInfo(post.Title)
 	post.Id = pr.counter
 	pr.store[pr.counter] = post
 	pr.counter++
@@ -68,8 +68,8 @@ func (pr *PostRepo) UpdatePost(id uint, newPost *domain.Post) (domain.Post, erro
 		return domain.Post{}, errors.New("post not found")
 	}
 
-	if newPost.Name == "" {
-		newPost.Name = post.Name
+	if newPost.Title == "" {
+		newPost.Title = post.Title
 	}
 	if newPost.Content == "" {
 		newPost.Content = post.Content

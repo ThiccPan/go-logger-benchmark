@@ -80,7 +80,7 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 	}
 
 	newPost := &domain.Post{
-		Name:    request.Name,
+		Title:   request.Name,
 		Content: request.Content,
 	}
 	post, err := ph.Repo.UpdatePost(uint(id), newPost)
@@ -128,7 +128,7 @@ func (ph *PostHandler) AddPostHandler(c echo.Context) error {
 
 	// add item to productRepo
 	newPost := &domain.Post{
-		Name:    productRequest.Name,
+		Title:   productRequest.Name,
 		Content: productRequest.Content,
 	}
 	ph.Repo.AddPost(newPost)
