@@ -1,7 +1,7 @@
 package domain
 
 type Post struct {
-	ID      uint
+	ID      uint `gorm:"primaryKey"`
 	Title   string
 	Content string
 }
