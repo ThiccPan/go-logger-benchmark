@@ -49,11 +49,18 @@ func (pr *SQLitePostRepo) GetPost(id uint) (domain.Post, error) {
 }
 
 func (pr *SQLitePostRepo) UpdatePost(id uint, newPost *domain.Post) (domain.Post, error) {
-	pr.db.Updates(newPost)
-	return domain.Post{}, nil
+	newPost.ID = id
+	res := pr.db.Updates(newPost)
+	if res.Error != nil {
+		return domain.Post{}, res.Error
+	}
+	return *newPost, nil
 }
 
 func (pr *SQLitePostRepo) DeletePost(id uint) (domain.Post, error) {
-	pr.db.Delete(&domain.Post{}, id)
+	res := pr.db.Delete(&domain.Post{}, id)
+	if res.Error != nil {
+		return domain.Post{}, res.Error
+	}
 	return domain.Post{}, nil
 }
