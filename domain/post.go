@@ -1,7 +1,7 @@
 package domain
 
 type Post struct {
-	Id      uint
+	ID      uint
 	Title   string
 	Content string
 }

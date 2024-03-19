@@ -29,7 +29,7 @@ func (pr *PostRepo) AddPost(post *domain.Post) error {
 	defer pr.Unlock()
 
 	pr.logger.LogInfo(post.Title)
-	post.Id = pr.counter
+	post.ID = pr.counter
 	pr.store[pr.counter] = post
 	pr.counter++
 	pr.logger.LogInfo("post has been added")
@@ -86,7 +86,7 @@ func (pr *PostRepo) DeletePost(id uint) (domain.Post, error) {
 	var post domain.Post
 	found := false
 	for i, v := range pr.store {
-		if v.Id == id {
+		if v.ID == id {
 			post = *pr.store[i]
 			delete(pr.store, i)
 			found = true
