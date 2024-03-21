@@ -1,263 +1,32 @@
 package main
 
 import (
-	"errors"
-	"fmt"
-	"net/http"
-	"os"
-	"strconv"
-	"sync"
-
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/thiccpan/go-logger-benchmark/app"
+	"github.com/thiccpan/go-logger-benchmark/handler"
+	"github.com/thiccpan/go-logger-benchmark/logger"
+	"github.com/thiccpan/go-logger-benchmark/repository"
 )
-
-type Post struct {
-	Id      uint
-	Name    string
-	Content string
-}
-
-type PostRepo struct {
-	sync.Mutex
-	store   map[uint]*Post
-	counter uint
-}
-
-func NewPostRepo() *PostRepo {
-	repo := PostRepo{
-		counter: 0,
-	}
-	repo.store = make(map[uint]*Post)
-	return &repo
-}
-
-func (pr *PostRepo) addPost(post *Post) error {
-	pr.Lock()
-	defer pr.Unlock()
-
-	log.Info().Msg(post.Name)
-	pr.store[pr.counter] = post
-	pr.counter++
-	log.Info().Msg("post has been added")
-	return nil
-}
-
-func (pr *PostRepo) getPost(id uint) (Post, error) {
-	pr.Lock()
-	defer pr.Unlock()
-
-	post, found := pr.store[id]
-	log.Info().Msg("fetching post successfully")
-	if !found {
-		return Post{}, errors.New("post not found")
-	}
-	return *post, nil
-}
-
-func (pr *PostRepo) updatePost(id uint, newPost *Post) (Post, error) {
-	pr.Lock()
-	defer pr.Unlock()
-
-	post, found := pr.store[id]
-	log.Info().Msg("fetching post successfully")
-	if !found {
-		return Post{}, errors.New("post not found")
-	}
-
-	if newPost.Name == "" {
-		newPost.Name = post.Name
-	}
-	if newPost.Content == "" {
-		newPost.Content = post.Content
-	}
-	pr.store[id] = newPost
-	log.Info().Msg("update post successfully")
-	return *pr.store[id], nil
-}
-
-func (pr *PostRepo) deletePost(id uint) (Post, error) {
-	pr.Lock()
-	defer pr.Unlock()
-
-	var post Post
-	found := false
-	for i, v := range pr.store {
-		if v.Id == id {
-			post = *pr.store[i]
-			delete(pr.store, i)
-			found = true
-			break
-		}
-	}
-	if !found {
-		return Post{}, errors.New("post not found")
-	}
-	log.Info().Msg("delete post successfully")
-	return post, nil
-}
-
-type PostHandler struct {
-	Repo *PostRepo
-}
-
-func NewPostHandler(repo *PostRepo) *PostHandler {
-	return &PostHandler{Repo: repo}
-}
-
-type addPostRequest struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
-}
-
-type updatePostRequest struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
-}
-
-func (ph *PostHandler) getPostsHandler(c echo.Context) error {
-	log.Info().Msg("fetching all posts")
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"post": ph.Repo.store,
-	})
-}
-func (ph *PostHandler) getPostHandler(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		log.Warn().Msg("failed to convert id")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id, use integer id",
-		})
-	}
-
-	post, err := ph.Repo.getPost(uint(id))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"post": post,
-	})
-}
-
-func (ph *PostHandler) updatePostHandler(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		log.Warn().Msg("failed to convert id")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id, use integer id",
-		})
-	}
-
-	request := &updatePostRequest{}
-	err = c.Bind(request)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	newPost := &Post{
-		Id: ph.Repo.counter,
-		Name: request.Name,
-		Content: request.Content,
-	}
-	post, err := ph.Repo.updatePost(uint(id), newPost)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"post": post,
-	})
-}
-
-func (ph *PostHandler) deletePostHandler(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		log.Warn().Msg("failed to convert id")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": "invalid id, use integer id",
-		})
-	}
-
-	post, err := ph.Repo.deletePost(uint(id))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"post": post,
-	})
-}
-
-func (ph *PostHandler) addPostHandler(c echo.Context) error {
-	productRequest := &addPostRequest{}
-	err := c.Bind(productRequest)
-
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"error": err.Error(),
-		})
-	}
-
-	// add item to productRepo
-	newPost := &Post{
-		Id:      ph.Repo.counter,
-		Name:    productRequest.Name,
-		Content: productRequest.Content,
-	}
-	ph.Repo.addPost(newPost)
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message": "successfully adding new post",
-		"post":    newPost,
-	})
-}
 
 func main() {
 	e := echo.New()
 
 	// configure logger
-	logFile, err := os.OpenFile("./log-history.log", os.O_RDWR, 0644)
-	if err != nil {
-		panic(1)
-	}
+	logger := logger.InitZap()
+	// logger := logger.InitZerolog()
 
-	zerolog.TimeFieldFormat = zerolog.TimestampFieldName
-	log.Logger = log.Output(logFile)
-	log.Logger = log.With().Caller().Logger()
+	// Initialized db conn
+	db := app.InitDB()
 
-	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
-		LogURI:    true,
-		LogStatus: true,
-		LogValuesFunc: func(c echo.Context, v middleware.RequestLoggerValues) error {
-			log.Info().
-				Str("URI", v.URI).
-				Int("status", v.Status).
-				Msg("request")
+	// PostRepo := repository.NewPostRepo(logger)
+	PostRepo := repository.NewSQLitePostRepo(logger, db)
+	PostHandler := handler.NewPostHandler(PostRepo, logger)
 
-			return nil
-		},
-	}))
-
-	PostRepo := NewPostRepo()
-	fmt.Println(PostRepo.store)
-	PostHandler := NewPostHandler(PostRepo)
-
-	e.POST("/posts", PostHandler.addPostHandler)
-	e.GET("/posts", PostHandler.getPostsHandler)
-	e.GET("/posts/:id", PostHandler.getPostHandler)
-	e.PUT("/posts/:id", PostHandler.updatePostHandler)
-	e.DELETE("/posts/:id", PostHandler.deletePostHandler)
+	e.POST("/posts", PostHandler.AddPostHandler)
+	e.GET("/posts", PostHandler.GetPostsHandler)
+	e.GET("/posts/:id", PostHandler.GetPostHandler)
+	e.PUT("/posts/:id", PostHandler.UpdatePostHandler)
+	e.DELETE("/posts/:id", PostHandler.DeletePostHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

@@ -5,7 +5,7 @@ export const options = {
   // A number specifying the number of VUs to run concurrently.
   vus: 30,
   // A string specifying the total duration of the test run.
-  duration: '10s',
+  duration: '60s',
 };
 
 // The function that defines VU logic.
@@ -14,18 +14,10 @@ export const options = {
 // about authoring k6 scripts.
 //
 export default function () {
-  http.post('http://localhost:8080/posts', JSON.stringify({
-    "name": "post lorem ipsum",
-    "content": "dolor si amet"
-  }), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+  let max_id = 100
+  let id = Math.floor(Math.random() * max_id)
+  http.get(`http://localhost:8080/posts/${id}`);
   sleep(1);
-
-  // let max_id = 100
-  // let id = Math.floor(Math.random() * max_id)
-  // http.get(`http://localhost:8080/posts/${id}`);
-  // sleep(1);
 }
 
 export function handleSummary(data) {
