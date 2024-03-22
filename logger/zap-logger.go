@@ -34,7 +34,7 @@ func InitZap() ZapLogger {
 			"stderr",
 			"log-history.log",
 		},
-		InitialFields: map[string]interface{}{
+		InitialFields: map[string]any{
 			"pid": os.Getpid(),
 		},
 	}

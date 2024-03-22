@@ -33,11 +33,11 @@ func (ph *PostHandler) GetPostsHandler(c echo.Context) error {
 	ph.logger.LogInfo("fetching all posts")
 	posts, err := ph.Repo.GetPosts()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"post": posts,
 	})
 }
@@ -45,19 +45,19 @@ func (ph *PostHandler) GetPostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
 		})
 	}
 
 	post, err := ph.Repo.GetPost(uint(id))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"post": post,
 	})
 }
@@ -66,7 +66,7 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
 		})
 	}
@@ -74,7 +74,7 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 	request := &updatePostRequest{}
 	err = c.Bind(request)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
@@ -85,12 +85,12 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 	}
 	post, err := ph.Repo.UpdatePost(uint(id), newPost)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"post": post,
 	})
 }
@@ -99,19 +99,19 @@ func (ph *PostHandler) DeletePostHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
 		})
 	}
 
 	post, err := ph.Repo.DeletePost(uint(id))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"post": post,
 	})
 }
@@ -121,7 +121,7 @@ func (ph *PostHandler) AddPostHandler(c echo.Context) error {
 	err := c.Bind(productRequest)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
@@ -134,7 +134,7 @@ func (ph *PostHandler) AddPostHandler(c echo.Context) error {
 	ph.Repo.AddPost(newPost)
 
 	ph.logger.LogInfo("successfully adding new post")
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"message": "successfully adding new post",
 		"post":    newPost,
 	})
