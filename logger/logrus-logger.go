@@ -14,7 +14,7 @@ func InitLogrusLogger() *LogrusLogger {
 	logger := &LogrusLogger{
 		log: &logrus.Logger{
 			Out:       os.Stderr,
-			Formatter: new(logrus.TextFormatter),
+			Formatter: new(logrus.JSONFormatter),
 			Hooks:     make(logrus.LevelHooks),
 			Level:     logrus.DebugLevel,
 		},
