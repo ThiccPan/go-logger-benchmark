@@ -16,7 +16,7 @@ func InitZap() ZapLogger {
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.TimeKey = "time"
 	encoderCfg.MessageKey = "message"
-	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
+	encoderCfg.EncodeTime = zapcore.RFC3339TimeEncoder
 
 	config := zap.Config{
 		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
@@ -27,11 +27,9 @@ func InitZap() ZapLogger {
 		Encoding:          "json",
 		EncoderConfig:     encoderCfg,
 		OutputPaths: []string{
-			"stderr",
 			"log-history.log",
 		},
 		ErrorOutputPaths: []string{
-			"stderr",
 			"log-history.log",
 		},
 		InitialFields: map[string]any{
