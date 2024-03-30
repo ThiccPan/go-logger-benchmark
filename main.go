@@ -6,6 +6,7 @@ import (
 	"github.com/thiccpan/go-logger-benchmark/handler"
 	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
+	"github.com/thiccpan/go-logger-benchmark/service"
 )
 
 func main() {
@@ -13,20 +14,28 @@ func main() {
 
 	// configure logger
 	logger := logger.InitZap()
+	// logger := logger.InitLogrusLogger()
 	// logger := logger.InitZerolog()
 
 	// Initialized db conn
 	db := app.InitDB()
 
-	// PostRepo := repository.NewPostRepo(logger)
-	PostRepo := repository.NewSQLitePostRepo(logger, db)
-	PostHandler := handler.NewPostHandler(PostRepo, logger)
+	// ItemRepo := repository.NewItemRepo(logger)
+	ItemRepo := repository.NewSQLiteItemRepo(logger, db)
+	AuthRepo := repository.NewSQLiteAuthRepo(logger, db)
+	AuthService := service.NewAuthService(logger, AuthRepo)
 
-	e.POST("/posts", PostHandler.AddPostHandler)
-	e.GET("/posts", PostHandler.GetPostsHandler)
-	e.GET("/posts/:id", PostHandler.GetPostHandler)
-	e.PUT("/posts/:id", PostHandler.UpdatePostHandler)
-	e.DELETE("/posts/:id", PostHandler.DeletePostHandler)
+	ItemHandler := handler.NewItemHandler(ItemRepo, logger)
+	AuthHandler := handler.NewAuthHandler(logger, *AuthService)
+
+	e.POST("/register", AuthHandler.RegisterHandler)
+	e.GET("/login", AuthHandler.LoginHandler)
+
+	e.POST("/items", ItemHandler.AddItemHandler)
+	e.GET("/items", ItemHandler.GetItemsHandler)
+	e.GET("/items/:id", ItemHandler.GetItemHandler)
+	e.PUT("/items/:id", ItemHandler.UpdateItemHandler)
+	e.DELETE("/items/:id", ItemHandler.DeleteItemHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
