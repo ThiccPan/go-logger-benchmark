@@ -14,9 +14,9 @@ export const options = {
 // about authoring k6 scripts.
 //
 export default function () {
-  http.post('http://localhost:8080/posts', JSON.stringify({
-    "name": "post lorem ipsum",
-    "content": "dolor si amet"
+  http.post('http://localhost:8080/items', JSON.stringify({
+    "name": "lorem ipsum",
+    "stock": 1
   }), {
     headers: { 'Content-Type': 'application/json' },
   })

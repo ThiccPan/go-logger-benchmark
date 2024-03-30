@@ -16,7 +16,7 @@ export const options = {
 export default function () {
   let max_id = 100
   let id = Math.floor(Math.random() * max_id)
-  http.get(`http://localhost:8080/posts/${id}`);
+  http.get(`http://localhost:8080/items/${id}`);
   sleep(1);
 }
 
