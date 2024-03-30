@@ -10,38 +10,38 @@ import (
 	"github.com/thiccpan/go-logger-benchmark/repository"
 )
 
-type PostHandler struct {
-	Repo   repository.IPostRepo
+type ItemHandler struct {
+	Repo   repository.IItemRepo
 	logger logger.Ilogger
 }
 
-func NewPostHandler(repo repository.IPostRepo, logger logger.Ilogger) *PostHandler {
-	return &PostHandler{Repo: repo, logger: logger}
+func NewItemHandler(repo repository.IItemRepo, logger logger.Ilogger) *ItemHandler {
+	return &ItemHandler{Repo: repo, logger: logger}
 }
 
-type addPostRequest struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
+type addItemRequest struct {
+	Name  string `json:"name"`
+	Stock uint   `json:"stock"`
 }
 
-type updatePostRequest struct {
-	Name    string `json:"name"`
-	Content string `json:"content"`
+type updateItemRequest struct {
+	Name  string `json:"name"`
+	Stock uint   `json:"stock"`
 }
 
-func (ph *PostHandler) GetPostsHandler(c echo.Context) error {
-	ph.logger.LogInfo("fetching all posts")
-	posts, err := ph.Repo.GetPosts()
+func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
+	ph.logger.LogInfo("fetching all items")
+	items, err := ph.Repo.GetItems()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 	return c.JSON(http.StatusOK, map[string]any{
-		"post": posts,
+		"item": items,
 	})
 }
-func (ph *PostHandler) GetPostHandler(c echo.Context) error {
+func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
@@ -50,7 +50,7 @@ func (ph *PostHandler) GetPostHandler(c echo.Context) error {
 		})
 	}
 
-	post, err := ph.Repo.GetPost(uint(id))
+	item, err := ph.Repo.GetItem(uint(id))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -58,11 +58,11 @@ func (ph *PostHandler) GetPostHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"post": post,
+		"item": item,
 	})
 }
 
-func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
+func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
@@ -71,7 +71,7 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 		})
 	}
 
-	request := &updatePostRequest{}
+	request := &updateItemRequest{}
 	err = c.Bind(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -79,11 +79,11 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 		})
 	}
 
-	newPost := &domain.Post{
-		Title:   request.Name,
-		Content: request.Content,
+	newItem := &domain.Item{
+		Name:  request.Name,
+		Stock: request.Stock,
 	}
-	post, err := ph.Repo.UpdatePost(uint(id), newPost)
+	item, err := ph.Repo.UpdateItem(uint(id), newItem)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -91,11 +91,11 @@ func (ph *PostHandler) UpdatePostHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"post": post,
+		"item": item,
 	})
 }
 
-func (ph *PostHandler) DeletePostHandler(c echo.Context) error {
+func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
@@ -104,7 +104,7 @@ func (ph *PostHandler) DeletePostHandler(c echo.Context) error {
 		})
 	}
 
-	post, err := ph.Repo.DeletePost(uint(id))
+	item, err := ph.Repo.DeleteItem(uint(id))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -112,12 +112,12 @@ func (ph *PostHandler) DeletePostHandler(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"post": post,
+		"item": item,
 	})
 }
 
-func (ph *PostHandler) AddPostHandler(c echo.Context) error {
-	productRequest := &addPostRequest{}
+func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
+	productRequest := &addItemRequest{}
 	err := c.Bind(productRequest)
 
 	if err != nil {
@@ -127,15 +127,15 @@ func (ph *PostHandler) AddPostHandler(c echo.Context) error {
 	}
 
 	// add item to productRepo
-	newPost := &domain.Post{
-		Title:   productRequest.Name,
-		Content: productRequest.Content,
+	newItem := &domain.Item{
+		Name:  productRequest.Name,
+		Stock: productRequest.Stock,
 	}
-	ph.Repo.AddPost(newPost)
+	ph.Repo.AddItem(newItem)
 
-	ph.logger.LogInfo("successfully adding new post")
+	ph.logger.LogInfo("successfully adding new item")
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "successfully adding new post",
-		"post":    newPost,
+		"message": "successfully adding new item",
+		"item":    newItem,
 	})
 }
