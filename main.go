@@ -1,9 +1,12 @@
 package main
 
 import (
+	"github.com/golang-jwt/jwt/v4"
+	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/thiccpan/go-logger-benchmark/app"
 	"github.com/thiccpan/go-logger-benchmark/handler"
+	"github.com/thiccpan/go-logger-benchmark/helper"
 	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 	"github.com/thiccpan/go-logger-benchmark/service"
@@ -20,22 +23,36 @@ func main() {
 	// Initialized db conn
 	db := app.InitDB()
 
+	// init jwt helper
+	jwtGen := helper.NewJWTGen("secret123")
+
 	// ItemRepo := repository.NewItemRepo(logger)
 	ItemRepo := repository.NewSQLiteItemRepo(logger, db)
+	ItemHandler := handler.NewItemHandler(ItemRepo, logger)
+
 	AuthRepo := repository.NewSQLiteAuthRepo(logger, db)
 	AuthService := service.NewAuthService(logger, AuthRepo)
-
-	ItemHandler := handler.NewItemHandler(ItemRepo, logger)
-	AuthHandler := handler.NewAuthHandler(logger, *AuthService)
+	AuthHandler := handler.NewAuthHandler(logger, *AuthService, *jwtGen)
 
 	e.POST("/register", AuthHandler.RegisterHandler)
 	e.GET("/login", AuthHandler.LoginHandler)
 
-	e.POST("/items", ItemHandler.AddItemHandler)
-	e.GET("/items", ItemHandler.GetItemsHandler)
-	e.GET("/items/:id", ItemHandler.GetItemHandler)
-	e.PUT("/items/:id", ItemHandler.UpdateItemHandler)
-	e.DELETE("/items/:id", ItemHandler.DeleteItemHandler)
+	r := e.Group("/items")
+
+	// Configure middleware with the custom claims type
+	config := echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(helper.JwtCustomClaims)
+		},
+		SigningKey: []byte("secret123"),
+	}
+	r.Use(echojwt.WithConfig(config))
+
+	r.POST("", ItemHandler.AddItemHandler)
+	r.GET("", ItemHandler.GetItemsHandler)
+	r.GET("/:id", ItemHandler.GetItemHandler)
+	r.PUT("/:id", ItemHandler.UpdateItemHandler)
+	r.DELETE("/:id", ItemHandler.DeleteItemHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
