@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/thiccpan/go-logger-benchmark/domain"
 	"github.com/thiccpan/go-logger-benchmark/logger"
@@ -40,9 +39,7 @@ func (as *AuthService) Register(user domain.RegisterRequest) error {
 }
 
 func (as *AuthService) Login(user domain.LoginRequest) (domain.User, error) {
-	fmt.Println(user.Email)
 	foundUser, err := as.repo.GetUserByEmail(user.Email)
-	fmt.Println(foundUser)
 	if err != nil {
 		return foundUser, err
 	}

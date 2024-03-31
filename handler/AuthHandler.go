@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -50,8 +49,6 @@ func (ah *AuthHandler) LoginHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(user)
 
 	userCred, err := ah.service.Login(user)
 	if err != nil {
