@@ -4,7 +4,6 @@ go 1.22.0
 
 require (
 	github.com/labstack/echo/v4 v4.11.4
-	github.com/rs/zerolog v1.32.0
 	github.com/sirupsen/logrus v1.9.3
 	go.uber.org/zap v1.27.0
 	gorm.io/driver/sqlite v1.5.5

@@ -18,7 +18,6 @@ func main() {
 	// configure logger
 	logger := logger.InitZap()
 	// logger := logger.InitLogrusLogger()
-	// logger := logger.InitZerolog()
 
 	// Initialized db conn
 	db := app.InitDB()
