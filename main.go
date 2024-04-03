@@ -33,8 +33,8 @@ func main() {
 	AuthService := service.NewAuthService(logger, AuthRepo)
 	AuthHandler := handler.NewAuthHandler(logger, *AuthService, *jwtGen)
 
+	e.POST("/login", AuthHandler.LoginHandler)
 	e.POST("/register", AuthHandler.RegisterHandler)
-	e.GET("/login", AuthHandler.LoginHandler)
 
 	r := e.Group("/items")
 
