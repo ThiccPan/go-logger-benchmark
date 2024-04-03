@@ -4,8 +4,10 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/thiccpan/go-logger-benchmark/domain"
+	"github.com/thiccpan/go-logger-benchmark/helper"
 	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 )
@@ -30,18 +32,27 @@ type updateItemRequest struct {
 }
 
 func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
-	ph.logger.LogInfo("fetching all items")
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*helper.JwtCustomClaims)
+
 	items, err := ph.Repo.GetItems()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
+	ph.logger.LogInfo("fetching all items successfull", map[string]any{
+		"email": claims.Email,
+	})
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": items,
 	})
 }
 func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*helper.JwtCustomClaims)
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
@@ -57,12 +68,19 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 		})
 	}
 
+	ph.logger.LogInfo("getting item successfull", map[string]any{
+		"email": claims.Email,
+	})
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": item,
 	})
 }
 
 func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*helper.JwtCustomClaims)
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
@@ -90,12 +108,19 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 		})
 	}
 
+	ph.logger.LogInfo("updating item successfull", map[string]any{
+		"email": claims.Email,
+	})
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": item,
 	})
 }
 
 func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*helper.JwtCustomClaims)
+
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		ph.logger.LogInfo("failed to convert id")
@@ -111,12 +136,19 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 		})
 	}
 
+	ph.logger.LogInfo("updating item successfull", map[string]any{
+		"email": claims.Email,
+	})
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": item,
 	})
 }
 
 func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(*helper.JwtCustomClaims)
+
 	productRequest := &addItemRequest{}
 	err := c.Bind(productRequest)
 
@@ -131,9 +163,17 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 		Name:  productRequest.Name,
 		Stock: productRequest.Stock,
 	}
-	ph.Repo.AddItem(newItem)
 
-	ph.logger.LogInfo("successfully adding new item")
+	if err = ph.Repo.AddItem(newItem); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"error": err.Error(),
+		})
+	}
+
+	ph.logger.LogInfo("successfully adding new item", map[string]any{
+		"email": claims.Email,
+	})
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "successfully adding new item",
 		"item":    newItem,
