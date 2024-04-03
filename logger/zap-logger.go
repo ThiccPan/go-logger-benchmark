@@ -44,22 +44,42 @@ func InitZap() ZapLogger {
 	return *logger
 }
 
-func (zlog ZapLogger) LogInfo(msg string) {
-	zlog.log.Info(msg)
+func (zlog ZapLogger) LogInfo(msg string, fields ...map[string]any) {
+	logFields := []zapcore.Field{}
+	for k, v := range fields[0] {
+		logFields = append(logFields, zap.Any(k, v))
+	}
+	zlog.log.Info(msg, logFields...)
 }
 
-func (zlog ZapLogger) LogErr(msg string) {
-	zlog.log.Error(msg)
+func (zlog ZapLogger) LogErr(msg string, fields ...map[string]any) {
+	logFields := []zapcore.Field{}
+	for k, v := range fields[0] {
+		logFields = append(logFields, zap.Any(k, v))
+	}
+	zlog.log.Error(msg, logFields...)
 }
 
-func (zlog ZapLogger) LogDebug(msg string) {
-	zlog.log.Debug(msg)
+func (zlog ZapLogger) LogDebug(msg string, fields ...map[string]any) {
+	logFields := []zapcore.Field{}
+	for k, v := range fields[0] {
+		logFields = append(logFields, zap.Any(k, v))
+	}
+	zlog.log.Debug(msg, logFields...)
 }
 
-func (zlog ZapLogger) LogWarn(msg string) {
-	zlog.log.Warn(msg)
+func (zlog ZapLogger) LogWarn(msg string, fields ...map[string]any) {
+	logFields := []zapcore.Field{}
+	for k, v := range fields[0] {
+		logFields = append(logFields, zap.Any(k, v))
+	}
+	zlog.log.Warn(msg, logFields...)
 }
 
-func (zlog ZapLogger) LogFatal(msg string) {
-	zlog.log.Fatal(msg)
+func (zlog ZapLogger) LogFatal(msg string, fields ...map[string]any) {
+	logFields := []zapcore.Field{}
+	for k, v := range fields[0] {
+		logFields = append(logFields, zap.Any(k, v))
+	}
+	zlog.log.Fatal(msg, logFields...)
 }
