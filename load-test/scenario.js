@@ -52,10 +52,12 @@ export default function () {
   sleep(1);
 
   // adding new item to the database
-  res = http.post(`http://localhost:8080/items`, JSON.stringify({
-    "name": "items",
-    "stock": 10,
-  }), params)
+  res = http.post(`http://localhost:8080/items`,
+    JSON.stringify({
+      "name": "items",
+      "stock": 10,
+    }),
+    params);
   sleep(1);
 
   // get item data from the response of post request, and use the ite id to get the item detail
@@ -65,6 +67,13 @@ export default function () {
     'is status 200': (r) => r.status === 200,
   });
   sleep(1);
+
+  res = http.put(`http://localhost:8080/items/${postedItem.item.ID}`,
+    JSON.stringify({
+      "stock": 15,
+    }),
+    params);
+  sleep(1)
 }
 
 // export function handleSummary(data) {
