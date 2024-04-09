@@ -60,7 +60,7 @@ export default function () {
     params);
   sleep(1);
 
-  // get item data from the response of post request, and use the ite id to get the item detail
+  // get item data from the response of post request, and use the item id to get the item detail
   let postedItem = res.json()
   res = http.get(`http://localhost:8080/items/${postedItem.item.ID}`, params);
   check(res, {
@@ -68,11 +68,15 @@ export default function () {
   });
   sleep(1);
 
+  // update item data stock property
   res = http.put(`http://localhost:8080/items/${postedItem.item.ID}`,
     JSON.stringify({
       "stock": 15,
     }),
     params);
+  check(res, {
+    'is status 200': (r) => r.status === 200,
+  });
   sleep(1)
 }
 
