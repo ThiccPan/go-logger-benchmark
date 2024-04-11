@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"os"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -32,9 +30,7 @@ func InitZap() ZapLogger {
 		ErrorOutputPaths: []string{
 			"log-history.log",
 		},
-		InitialFields: map[string]any{
-			"pid": os.Getpid(),
-		},
+		InitialFields: map[string]any{},
 	}
 
 	logger := &ZapLogger{
