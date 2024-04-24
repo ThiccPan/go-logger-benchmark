@@ -70,6 +70,7 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 
 	ph.logger.LogInfo("getting item successfull", map[string]any{
 		"email": claims.Email,
+		"item_id": id,
 	})
 
 	return c.JSON(http.StatusOK, map[string]any{
@@ -139,6 +140,7 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 
 	ph.logger.LogInfo("updating item successfull", map[string]any{
 		"email": claims.Email,
+		"item_id": id,
 	})
 
 	return c.JSON(http.StatusOK, map[string]any{
