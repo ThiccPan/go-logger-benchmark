@@ -110,6 +110,7 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 
 	ph.logger.LogInfo("updating item successfull", map[string]any{
 		"email": claims.Email,
+		"item_id": id,
 	})
 
 	return c.JSON(http.StatusOK, map[string]any{
