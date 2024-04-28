@@ -29,7 +29,7 @@ func (sau *SQLiteAuthRepo) AddUser(user *domain.User) error {
 
 func (sau *SQLiteAuthRepo) GetUserByEmail(email string) (domain.User, error) {
 	var user domain.User
-	db := sau.db.First(&user, "email = ?", email)
+	db := sau.db.Raw("SELECT * FROM `users` WHERE email = ? ORDER BY `users`.`id` LIMIT 1;", email).Scan(&user)
 	if err := db.Error; err != nil {
 		return user, err
 	}
