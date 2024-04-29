@@ -6,8 +6,8 @@ import { SharedArray } from 'k6/data';
 export const options = {
   // A number specifying the number of VUs to run concurrently.
   vus: 3,
-  // A string specifying the total duration of the test run.
-  duration: '60s',
+  // A string specifying the total iteration of the test execution.
+  iterations: 10,
 };
 
 const sharedData = new SharedArray("credentials", () => {
@@ -26,26 +26,27 @@ export default function () {
   console.log(userCred)
 
   // login to obtain JWT to get access to restricted resource
-  const loginRes = http.post(`http://localhost:8080/login`, JSON.stringify({
-    "email": userCred.email,
-    "password": "password"
-  }), {
+  const loginRes = http.post(
+    `http://localhost:8080/login`,
+    JSON.stringify({
+      "email": userCred.email,
+      "password": "password"
+    }), {
     headers: { 'Content-Type': 'application/json' },
+    tags: { name: "login request" }
   })
   const token = loginRes.json().token
   console.log(token)
   sleep(1);
 
-  // request params with authorization token
-  const params = {
+  // getting list of items in database
+  let res = http.get(`http://localhost:8080/items`, {
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-  };
-
-  // getting list of items in database
-  let res = http.get(`http://localhost:8080/items`, params);
+    tags: { name: "get list of items request" }
+  });
   check(res, {
     'is status 200': (r) => r.status === 200,
   });
@@ -56,16 +57,31 @@ export default function () {
     JSON.stringify({
       "name": "items",
       "stock": 10,
-    }),
-    params);
+    }), {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    tags: { name: "add new item request" }
+  });
   sleep(1);
 
   // get item data from the response of post request, and use the item id to get the item detail
   let postedItem = res.json()
-  res = http.get(`http://localhost:8080/items/${postedItem.item.ID}`, params);
+  res = http.get(
+    `http://localhost:8080/items/${postedItem.item.ID}`,
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      tags: { name: "get item by id request" }
+    });
+
   check(res, {
     'is status 200': (r) => r.status === 200,
   });
+
   sleep(1);
 
   // update item data stock property
@@ -73,7 +89,13 @@ export default function () {
     JSON.stringify({
       "stock": 15,
     }),
-    params);
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      tags: { name: "update item request" }
+    });
   check(res, {
     'is status 200': (r) => r.status === 200,
   });
