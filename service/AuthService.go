@@ -8,19 +8,24 @@ import (
 	"github.com/thiccpan/go-logger-benchmark/repository"
 )
 
-type AuthService struct {
+type AuthService interface {
+	Register(user domain.RegisterRequest) error
+	Login(user domain.LoginRequest) (domain.User, error)
+}
+
+type authService struct {
 	logger logger.Ilogger
 	repo   repository.IAuthRepository
 }
 
-func NewAuthService(logger logger.Ilogger, repo repository.IAuthRepository) *AuthService {
-	return &AuthService{
+func NewAuthService(logger logger.Ilogger, repo repository.IAuthRepository) *authService {
+	return &authService{
 		logger: logger,
 		repo:   repo,
 	}
 }
 
-func (as *AuthService) Register(user domain.RegisterRequest) error {
+func (as *authService) Register(user domain.RegisterRequest) error {
 	foundUser, _ := as.repo.GetUserByEmail(user.Email)
 	if foundUser.Email != "" {
 		return errors.New("email is not unique")
@@ -38,7 +43,7 @@ func (as *AuthService) Register(user domain.RegisterRequest) error {
 	return nil
 }
 
-func (as *AuthService) Login(user domain.LoginRequest) (domain.User, error) {
+func (as *authService) Login(user domain.LoginRequest) (domain.User, error) {
 	foundUser, err := as.repo.GetUserByEmail(user.Email)
 	if err != nil {
 		return foundUser, err
