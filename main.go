@@ -27,11 +27,12 @@ func main() {
 
 	// ItemRepo := repository.NewItemRepo(logger)
 	ItemRepo := repository.NewSQLiteItemRepo(logger, db)
-	ItemHandler := handler.NewItemHandler(ItemRepo, logger)
+	ItemService := service.NewItemService(ItemRepo)
+	ItemHandler := handler.NewItemHandler(ItemRepo, ItemService, logger)
 
 	AuthRepo := repository.NewSQLiteAuthRepo(logger, db)
 	AuthService := service.NewAuthService(logger, AuthRepo)
-	AuthHandler := handler.NewAuthHandler(logger, *AuthService, *jwtGen)
+	AuthHandler := handler.NewAuthHandler(logger, AuthService, *jwtGen)
 
 	e.POST("/login", AuthHandler.LoginHandler)
 	e.POST("/register", AuthHandler.RegisterHandler)

@@ -10,15 +10,17 @@ import (
 	"github.com/thiccpan/go-logger-benchmark/helper"
 	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
+	"github.com/thiccpan/go-logger-benchmark/service"
 )
 
 type ItemHandler struct {
-	Repo   repository.IItemRepo
-	logger logger.Ilogger
+	Repo    repository.IItemRepo
+	service service.IItemService
+	logger  logger.Ilogger
 }
 
-func NewItemHandler(repo repository.IItemRepo, logger logger.Ilogger) *ItemHandler {
-	return &ItemHandler{Repo: repo, logger: logger}
+func NewItemHandler(repo repository.IItemRepo, service service.IItemService, logger logger.Ilogger) *ItemHandler {
+	return &ItemHandler{Repo: repo, service: service, logger: logger}
 }
 
 type addItemRequest struct {
@@ -69,7 +71,7 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 	}
 
 	ph.logger.LogInfo("getting item successfull", map[string]any{
-		"email": claims.Email,
+		"email":   claims.Email,
 		"item_id": id,
 	})
 
@@ -110,7 +112,7 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	}
 
 	ph.logger.LogInfo("updating item successfull", map[string]any{
-		"email": claims.Email,
+		"email":   claims.Email,
 		"item_id": id,
 	})
 
@@ -139,7 +141,7 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 	}
 
 	ph.logger.LogInfo("updating item successfull", map[string]any{
-		"email": claims.Email,
+		"email":   claims.Email,
 		"item_id": id,
 	})
 
@@ -154,7 +156,6 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 
 	productRequest := &addItemRequest{}
 	err := c.Bind(productRequest)
-
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -162,12 +163,12 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 	}
 
 	// add item to productRepo
-	newItem := &domain.Item{
+	newItem := domain.Item{
 		Name:  productRequest.Name,
 		Stock: productRequest.Stock,
 	}
 
-	if err = ph.Repo.AddItem(newItem); err != nil {
+	if err = ph.service.AddItem(newItem); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
