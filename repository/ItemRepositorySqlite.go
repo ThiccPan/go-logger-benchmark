@@ -12,15 +12,15 @@ type SQLiteItemRepo struct {
 }
 
 func NewSQLiteItemRepo(logger logger.Ilogger, db *gorm.DB) *SQLiteItemRepo {
-	repo := SQLiteItemRepo{
+	repo := &SQLiteItemRepo{
 		db:     db,
 		logger: logger,
 	}
-	return &repo
+	return repo
 }
 
-func (pr *SQLiteItemRepo) AddItem(item *domain.Item) error {
-	res := pr.db.Create(item)
+func (pr *SQLiteItemRepo) AddItem(item domain.Item) error {
+	res := pr.db.Create(&item)
 	if res.Error != nil {
 		return res.Error
 	}
