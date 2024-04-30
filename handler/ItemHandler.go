@@ -37,7 +37,7 @@ func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
 	claims := user.Claims.(*helper.JwtCustomClaims)
 
-	items, err := ph.Repo.GetItems()
+	items, err := ph.service.GetItems()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -63,7 +63,7 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 		})
 	}
 
-	item, err := ph.Repo.GetItem(uint(id))
+	item, err := ph.service.GetItem(uint(id))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -100,11 +100,11 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 		})
 	}
 
-	newItem := &domain.Item{
+	newItem := domain.Item{
 		Name:  request.Name,
 		Stock: request.Stock,
 	}
-	item, err := ph.Repo.UpdateItem(uint(id), newItem)
+	item, err := ph.service.UpdateItem(uint(id), newItem)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
@@ -133,7 +133,7 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 		})
 	}
 
-	item, err := ph.Repo.DeleteItem(uint(id))
+	item, err := ph.service.DeleteItem(uint(id))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),

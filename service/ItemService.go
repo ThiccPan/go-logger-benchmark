@@ -7,6 +7,10 @@ import (
 
 type IItemService interface {
 	AddItem(newItem domain.Item) error
+	GetItems() ([]domain.Item, error)
+	GetItem(id uint) (domain.Item, error)
+	UpdateItem(id uint, updateToItem domain.Item) (domain.Item, error)
+	DeleteItem(id uint) (domain.Item, error)
 }
 
 type itemService struct {
@@ -26,4 +30,36 @@ func (is *itemService) AddItem(newItem domain.Item) error {
 		return err
 	}
 	return nil
+}
+
+func (is *itemService) GetItems() ([]domain.Item, error) {
+	items, err := is.repo.GetItems()
+	if err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+func (is *itemService) GetItem(id uint) (domain.Item, error) {
+	item, err := is.repo.GetItem(uint(id))
+	if err != nil {
+		return item, err
+	}
+	return item, nil
+}
+
+func (is *itemService) UpdateItem(id uint, updateToItem domain.Item) (domain.Item, error) {
+	item, err := is.repo.UpdateItem(uint(id), &updateToItem)
+	if err != nil {
+		return item, err
+	}
+	return item, nil
+}
+
+func (is *itemService) DeleteItem(id uint) (domain.Item, error) {
+	item, err := is.repo.DeleteItem(id)
+	if err != nil {
+		return item, err
+	}
+	return item, nil
 }
