@@ -1,5 +1,8 @@
 package logger
 
+const zapLogfilePath = "zap-log-history.log"
+const logrusLogfilePath = "logruslog-history.log"
+
 type Ilogger interface {
 	LogInfo(msg string, fields ...map[string]any)
 	LogErr(msg string, fields ...map[string]any)

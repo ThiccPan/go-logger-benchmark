@@ -25,10 +25,10 @@ func InitZap() ZapLogger {
 		Encoding:          "json",
 		EncoderConfig:     encoderCfg,
 		OutputPaths: []string{
-			"log-history.log",
+			zapLogfilePath,
 		},
 		ErrorOutputPaths: []string{
-			"log-history.log",
+			zapLogfilePath,
 		},
 		InitialFields: map[string]any{},
 	}
