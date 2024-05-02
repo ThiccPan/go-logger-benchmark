@@ -13,7 +13,7 @@ type LogrusLogger struct {
 
 func InitLogrusLogger() *LogrusLogger {
 	// open logfile location
-	logFile, err := os.OpenFile(logrusLogfilePath, os.O_RDWR, 0644)
+	logFile, err := os.OpenFile(logrusLogfilePath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
 		panic(1)
 	}
