@@ -1,1 +1,0 @@
-k6 run ./load-test/script.js --out json=test.json --summary-export=summary.json
