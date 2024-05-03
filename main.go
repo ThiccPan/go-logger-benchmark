@@ -1,24 +1,31 @@
 package main
 
 import (
+	"flag"
+	"log"
+
 	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/thiccpan/go-logger-benchmark/app"
 	"github.com/thiccpan/go-logger-benchmark/handler"
 	"github.com/thiccpan/go-logger-benchmark/helper"
-	"github.com/thiccpan/go-logger-benchmark/logger"
+	logging "github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 	"github.com/thiccpan/go-logger-benchmark/service"
 )
 
 func main() {
+	logArgs := flag.String("logconf", "foo", "a string")
+	flag.Parse()
 	e := echo.New()
 
+	log.Println(*logArgs)
 	// configure logger
-	logger := logger.InitZap()
-	// logger := logger.InitLogrusLogger()
-
+	logger := initLogger(*logArgs)
+	if logger == nil {
+		log.Fatal("invalid logger package type")
+	}
 	// Initialized db conn
 	db := app.InitDB()
 
@@ -55,4 +62,15 @@ func main() {
 	r.DELETE("/:id", ItemHandler.DeleteItemHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
+}
+
+func initLogger(logArgs string) logging.Ilogger {
+	if logArgs == "zap" {
+		log.Println("using zap logger")
+		return logging.InitZap()
+	} else if logArgs == "logrus" {
+		log.Println("using logrus logger")
+		return logging.InitLogrusLogger()
+	}
+	return nil
 }
