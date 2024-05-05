@@ -47,12 +47,16 @@ func (ah *AuthHandler) LoginHandler(c echo.Context) error {
 	var user domain.LoginRequest
 	err := c.Bind(&user)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"error": "invalid login req",
+		})
 	}
 
 	userCred, err := ah.service.Login(user)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"error": "login service err",
+		})
 	}
 
 	token, err := ah.jwt.GenerateToken(userCred.ID, userCred.Username, userCred.Email, userCred.Password)
