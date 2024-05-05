@@ -114,6 +114,7 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	ph.logger.LogInfo("updating item successfull", map[string]any{
 		"email":   claims.Email,
 		"item_id": id,
+		"item_name": newItem.Name,
 	})
 
 	return c.JSON(http.StatusOK, map[string]any{
@@ -168,7 +169,8 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 		Stock: productRequest.Stock,
 	}
 
-	if err = ph.service.AddItem(newItem); err != nil {
+	item, err := ph.service.AddItem(newItem);
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
@@ -176,10 +178,12 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 
 	ph.logger.LogInfo("successfully adding new item", map[string]any{
 		"email": claims.Email,
+		"item_id": item.ID,
+		"item_name": item.Name,
 	})
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "successfully adding new item",
-		"item":    newItem,
+		"item":    item,
 	})
 }

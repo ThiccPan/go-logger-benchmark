@@ -6,7 +6,7 @@ import (
 )
 
 type IItemService interface {
-	AddItem(newItem domain.Item) error
+	AddItem(newItem domain.Item) (domain.Item, error)
 	GetItems() ([]domain.Item, error)
 	GetItem(id uint) (domain.Item, error)
 	UpdateItem(id uint, updateToItem domain.Item) (domain.Item, error)
@@ -25,11 +25,12 @@ func NewItemService(repo repository.IItemRepo) *itemService {
 	}
 }
 
-func (is *itemService) AddItem(newItem domain.Item) error {
-	if err := is.repo.AddItem(newItem); err != nil {
-		return err
+func (is *itemService) AddItem(newItem domain.Item) (domain.Item, error) {
+	item, err := is.repo.AddItem(newItem)
+	if err != nil {
+		return item, err
 	}
-	return nil
+	return item, nil
 }
 
 func (is *itemService) GetItems() ([]domain.Item, error) {

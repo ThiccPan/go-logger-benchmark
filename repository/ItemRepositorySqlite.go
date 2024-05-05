@@ -19,13 +19,13 @@ func NewSQLiteItemRepo(logger logger.Ilogger, db *gorm.DB) *SQLiteItemRepo {
 	return repo
 }
 
-func (pr *SQLiteItemRepo) AddItem(item domain.Item) error {
+func (pr *SQLiteItemRepo) AddItem(item domain.Item) (domain.Item, error) {
 	res := pr.db.Create(&item)
 	if res.Error != nil {
-		return res.Error
+		return item, res.Error
 	}
 
-	return nil
+	return item, nil
 }
 
 func (pr *SQLiteItemRepo) GetItems() ([]domain.Item, error) {
