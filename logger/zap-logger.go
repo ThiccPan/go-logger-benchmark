@@ -42,40 +42,50 @@ func InitZap() ZapLogger {
 
 func (zlog ZapLogger) LogInfo(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
-	for k, v := range fields[0] {
-		logFields = append(logFields, zap.Any(k, v))
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields = append(logFields, zap.Any(k, v))
+		}
 	}
 	zlog.log.Info(msg, logFields...)
 }
 
 func (zlog ZapLogger) LogErr(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
-	for k, v := range fields[0] {
-		logFields = append(logFields, zap.Any(k, v))
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields = append(logFields, zap.Any(k, v))
+		}
 	}
 	zlog.log.Error(msg, logFields...)
 }
 
 func (zlog ZapLogger) LogDebug(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
-	for k, v := range fields[0] {
-		logFields = append(logFields, zap.Any(k, v))
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields = append(logFields, zap.Any(k, v))
+		}
 	}
 	zlog.log.Debug(msg, logFields...)
 }
 
 func (zlog ZapLogger) LogWarn(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
-	for k, v := range fields[0] {
-		logFields = append(logFields, zap.Any(k, v))
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields = append(logFields, zap.Any(k, v))
+		}
 	}
 	zlog.log.Warn(msg, logFields...)
 }
 
 func (zlog ZapLogger) LogFatal(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
-	for k, v := range fields[0] {
-		logFields = append(logFields, zap.Any(k, v))
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields = append(logFields, zap.Any(k, v))
+		}
 	}
 	zlog.log.Fatal(msg, logFields...)
 }

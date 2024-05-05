@@ -39,40 +39,50 @@ func InitLogrusLogger() *LogrusLogger {
 
 func (llog *LogrusLogger) LogInfo(msg string, fields ...map[string]any) {
 	logFields := logrus.Fields{}
-	for k, v := range fields[0] {
-		logFields[k] = v
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields[k] = v
+		}
 	}
 	llog.log.WithFields(logFields).Info(msg)
 }
 
 func (llog *LogrusLogger) LogErr(msg string, fields ...map[string]any) {
 	logFields := logrus.Fields{}
-	for k, v := range fields[0] {
-		logFields[k] = v
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields[k] = v
+		}
 	}
 	llog.log.WithFields(logFields).Error(msg)
 }
 
 func (llog *LogrusLogger) LogDebug(msg string, fields ...map[string]any) {
 	logFields := logrus.Fields{}
-	for k, v := range fields[0] {
-		logFields[k] = v
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields[k] = v
+		}
 	}
 	llog.log.WithFields(logFields).Debug(msg)
 }
 
 func (llog *LogrusLogger) LogWarn(msg string, fields ...map[string]any) {
 	logFields := logrus.Fields{}
-	for k, v := range fields[0] {
-		logFields[k] = v
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields[k] = v
+		}
 	}
 	llog.log.WithFields(logFields).Warn(msg)
 }
 
 func (llog *LogrusLogger) LogFatal(msg string, fields ...map[string]any) {
 	logFields := logrus.Fields{}
-	for k, v := range fields[0] {
-		logFields[k] = v
+	if fields != nil {
+		for k, v := range fields[0] {
+			logFields[k] = v
+		}
 	}
 	llog.log.WithFields(logFields).Fatal(msg)
 }
