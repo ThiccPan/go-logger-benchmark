@@ -1,7 +1,7 @@
 package logger
 
 const zapLogfilePath = "zap-log-history.log"
-const logrusLogfilePath = "logruslog-history.log"
+const logrusLogfilePath = "logrus-log-history.log"
 
 type Ilogger interface {
 	LogInfo(msg string, fields ...map[string]any)
