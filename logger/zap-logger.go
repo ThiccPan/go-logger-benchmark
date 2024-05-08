@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"slices"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -17,7 +19,7 @@ func InitZap() ZapLogger {
 	encoderCfg.EncodeTime = zapcore.RFC3339TimeEncoder
 
 	config := zap.Config{
-		Level:             zap.NewAtomicLevelAt(zap.InfoLevel),
+		Level:             zap.NewAtomicLevelAt(zap.DebugLevel),
 		Development:       false,
 		DisableCaller:     true,
 		DisableStacktrace: false,
@@ -43,6 +45,7 @@ func InitZap() ZapLogger {
 func (zlog ZapLogger) LogInfo(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
 	if fields != nil {
+		logFields = slices.Grow(logFields, len(fields[0]))
 		for k, v := range fields[0] {
 			logFields = append(logFields, zap.Any(k, v))
 		}
@@ -53,6 +56,7 @@ func (zlog ZapLogger) LogInfo(msg string, fields ...map[string]any) {
 func (zlog ZapLogger) LogErr(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
 	if fields != nil {
+		logFields = slices.Grow(logFields, len(fields[0]))
 		for k, v := range fields[0] {
 			logFields = append(logFields, zap.Any(k, v))
 		}
@@ -63,6 +67,7 @@ func (zlog ZapLogger) LogErr(msg string, fields ...map[string]any) {
 func (zlog ZapLogger) LogDebug(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
 	if fields != nil {
+		logFields = slices.Grow(logFields, len(fields[0]))
 		for k, v := range fields[0] {
 			logFields = append(logFields, zap.Any(k, v))
 		}
@@ -73,6 +78,7 @@ func (zlog ZapLogger) LogDebug(msg string, fields ...map[string]any) {
 func (zlog ZapLogger) LogWarn(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
 	if fields != nil {
+		logFields = slices.Grow(logFields, len(fields[0]))
 		for k, v := range fields[0] {
 			logFields = append(logFields, zap.Any(k, v))
 		}
@@ -83,6 +89,7 @@ func (zlog ZapLogger) LogWarn(msg string, fields ...map[string]any) {
 func (zlog ZapLogger) LogFatal(msg string, fields ...map[string]any) {
 	logFields := []zapcore.Field{}
 	if fields != nil {
+		logFields = slices.Grow(logFields, len(fields[0]))
 		for k, v := range fields[0] {
 			logFields = append(logFields, zap.Any(k, v))
 		}
