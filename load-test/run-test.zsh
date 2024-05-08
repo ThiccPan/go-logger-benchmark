@@ -10,6 +10,7 @@ then
     k6 run ./add-item.js --out csv=test-result/test-add-$2.csv --summary-export=test-result/summary-add-$2.json
 else
     echo "command not registered"
+    exit 1
 fi
 ENDTS=$EPOCHSECONDS
 curl http://localhost:19999/api/v1/data\?chart\=app.logging-experiment_cpu_utilization\&after\=$STARTTS\&before\=$ENDTS > test-result/cpu-$1-$2.json
