@@ -1,2 +1,2 @@
 go build
-bash -c "exec -a logging-experiment ./go-logger-benchmark"
+exec -a logging-experiment ./go-logger-benchmark -logconf=$1
