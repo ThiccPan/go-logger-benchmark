@@ -5,15 +5,21 @@ import { SharedArray } from 'k6/data';
 
 export const options = {
     // A number specifying the number of VUs to run concurrently.
-    vus: 3,
+    vus: 10,
     // A string specifying the total duration of the test run.
-    duration: '60s',
+    duration: '1m',
 };
 
 const sharedData = new SharedArray("credentials", () => {
     let data = JSON.parse(open('users.json'))
     console.log(data)
-    return data
+
+    const vusNum = options.vus
+    const usersCred = []
+    for (let i = 0; i < vusNum; i++) {
+        usersCred[i] = data[i]
+    }
+    return usersCred
 })
 
 /**
@@ -33,7 +39,7 @@ export default function () {
         headers: { 'Content-Type': 'application/json' },
     })
     const token = loginRes.json().token
-    console.log(token)
+    console.log("token:", token)
     sleep(1);
 
     // request params with authorization token
