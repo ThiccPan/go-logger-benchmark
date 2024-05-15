@@ -31,7 +31,7 @@ func main() {
 
 	// ItemRepo := repository.NewItemRepo(logger)
 	ItemRepo := repository.NewSQLiteItemRepo(db)
-	ItemService := service.NewItemService(ItemRepo)
+	ItemService := service.NewItemService(ItemRepo, logger)
 	ItemHandler := handler.NewItemHandler(ItemRepo, ItemService, logger)
 
 	AuthRepo := repository.NewSQLiteAuthRepo(db)
