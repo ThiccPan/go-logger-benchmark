@@ -1,18 +1,12 @@
 package logger
 
 import (
-	"slices"
-
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type ZapLogger struct {
-	log *zap.Logger
-}
-
 // logErr implements Ilogger.
-func InitZap() *ZapLogger {
+func InitZap() *zap.Logger {
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.TimeKey = "time"
 	encoderCfg.MessageKey = "message"
@@ -35,64 +29,7 @@ func InitZap() *ZapLogger {
 		InitialFields: map[string]any{},
 	}
 
-	logger := &ZapLogger{
-		log: zap.Must(config.Build()),
-	}
+	logger := zap.Must(config.Build())
 
 	return logger
-}
-
-func (zlog ZapLogger) LogInfo(msg string, fields ...map[string]any) {
-	logFields := []zapcore.Field{}
-	if fields != nil {
-		logFields = slices.Grow(logFields, len(fields[0]))
-		for k, v := range fields[0] {
-			logFields = append(logFields, zap.Any(k, v))
-		}
-	}
-	zlog.log.Info(msg, logFields...)
-}
-
-func (zlog ZapLogger) LogErr(msg string, fields ...map[string]any) {
-	logFields := []zapcore.Field{}
-	if fields != nil {
-		logFields = slices.Grow(logFields, len(fields[0]))
-		for k, v := range fields[0] {
-			logFields = append(logFields, zap.Any(k, v))
-		}
-	}
-	zlog.log.Error(msg, logFields...)
-}
-
-func (zlog ZapLogger) LogDebug(msg string, fields ...map[string]any) {
-	logFields := []zapcore.Field{}
-	if fields != nil {
-		logFields = slices.Grow(logFields, len(fields[0]))
-		for k, v := range fields[0] {
-			logFields = append(logFields, zap.Any(k, v))
-		}
-	}
-	zlog.log.Debug(msg, logFields...)
-}
-
-func (zlog ZapLogger) LogWarn(msg string, fields ...map[string]any) {
-	logFields := []zapcore.Field{}
-	if fields != nil {
-		logFields = slices.Grow(logFields, len(fields[0]))
-		for k, v := range fields[0] {
-			logFields = append(logFields, zap.Any(k, v))
-		}
-	}
-	zlog.log.Warn(msg, logFields...)
-}
-
-func (zlog ZapLogger) LogFatal(msg string, fields ...map[string]any) {
-	logFields := []zapcore.Field{}
-	if fields != nil {
-		logFields = slices.Grow(logFields, len(fields[0]))
-		for k, v := range fields[0] {
-			logFields = append(logFields, zap.Any(k, v))
-		}
-	}
-	zlog.log.Fatal(msg, logFields...)
 }
