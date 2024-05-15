@@ -10,15 +10,17 @@ import (
 	"github.com/thiccpan/go-logger-benchmark/helper"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 	"github.com/thiccpan/go-logger-benchmark/service"
+	"go.uber.org/zap"
 )
 
 type ItemHandler struct {
 	Repo    repository.IItemRepo
 	service service.IItemService
+	logger  *zap.Logger
 }
 
-func NewItemHandler(repo repository.IItemRepo, service service.IItemService) *ItemHandler {
-	return &ItemHandler{Repo: repo, service: service}
+func NewItemHandler(repo repository.IItemRepo, service service.IItemService, logger *zap.Logger) *ItemHandler {
+	return &ItemHandler{Repo: repo, service: service, logger: logger}
 }
 
 type addItemRequest struct {
@@ -33,7 +35,7 @@ type updateItemRequest struct {
 
 func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	_ = user.Claims.(*helper.JwtCustomClaims)
+	claims := user.Claims.(*helper.JwtCustomClaims)
 
 	items, err := ph.service.GetItems()
 	if err != nil {
@@ -44,6 +46,7 @@ func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
 	// ph.logger.LogInfo("fetching all items successfull", map[string]any{
 	// 	"email": claims.Email,
 	// })
+	ph.logger.Info("fetching all items successfull", zap.String("email", claims.Email))
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": items,
@@ -51,11 +54,12 @@ func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
 }
 func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	_ = user.Claims.(*helper.JwtCustomClaims)
+	claims := user.Claims.(*helper.JwtCustomClaims)
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		// ph.logger.LogInfo("failed to convert id")
+		ph.logger.Info("failed to convert id", zap.String("email", claims.Email))
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
 		})
@@ -72,6 +76,11 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 	// 	"email":   claims.Email,
 	// 	"item_id": id,
 	// })
+	ph.logger.Info(
+		"getting item successfull",
+		zap.String("email", claims.Email),
+		zap.Int("item_id", id),
+	)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": item,
@@ -80,7 +89,7 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 
 func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	_ = user.Claims.(*helper.JwtCustomClaims)
+	claims := user.Claims.(*helper.JwtCustomClaims)
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -114,6 +123,11 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	// 	"item_id":   id,
 	// 	"item_name": newItem.Name,
 	// })
+	ph.logger.Info(
+		"updating item successfull",
+		zap.String("email", claims.Email),
+		zap.Int("item_id", id),
+	)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": item,
@@ -122,7 +136,7 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 
 func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	_ = user.Claims.(*helper.JwtCustomClaims)
+	claims := user.Claims.(*helper.JwtCustomClaims)
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -143,6 +157,11 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 	// 	"email":   claims.Email,
 	// 	"item_id": id,
 	// })
+	ph.logger.Info(
+		"deleting item successfull",
+		zap.String("email", claims.Email),
+		zap.Int("item_id", id),
+	)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"item": item,
@@ -151,7 +170,7 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 
 func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 	user := c.Get("user").(*jwt.Token)
-	_ = user.Claims.(*helper.JwtCustomClaims)
+	claims := user.Claims.(*helper.JwtCustomClaims)
 
 	productRequest := &addItemRequest{}
 	err := c.Bind(productRequest)
@@ -179,6 +198,12 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 	// 	"item_id":   item.ID,
 	// 	"item_name": item.Name,
 	// })
+	ph.logger.Info(
+		"successfully adding new item",
+		zap.String("email", claims.Email),
+		zap.Uint("item_id", item.ID),
+	)
+	
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "successfully adding new item",
