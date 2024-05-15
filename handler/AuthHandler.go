@@ -6,19 +6,16 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/thiccpan/go-logger-benchmark/domain"
 	"github.com/thiccpan/go-logger-benchmark/helper"
-	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/service"
 )
 
 type AuthHandler struct {
-	logger  logger.Ilogger
 	service service.AuthService
 	jwt     helper.AuthJWT
 }
 
-func NewAuthHandler(logger logger.Ilogger, service service.AuthService, jwt helper.AuthJWT) *AuthHandler {
+func NewAuthHandler(service service.AuthService, jwt helper.AuthJWT) *AuthHandler {
 	return &AuthHandler{
-		logger:  logger,
 		service: service,
 		jwt:     jwt,
 	}

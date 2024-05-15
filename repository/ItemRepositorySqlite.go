@@ -2,19 +2,16 @@ package repository
 
 import (
 	"github.com/thiccpan/go-logger-benchmark/domain"
-	"github.com/thiccpan/go-logger-benchmark/logger"
 	"gorm.io/gorm"
 )
 
 type SQLiteItemRepo struct {
-	logger logger.Ilogger
 	db     *gorm.DB
 }
 
-func NewSQLiteItemRepo(logger logger.Ilogger, db *gorm.DB) *SQLiteItemRepo {
+func NewSQLiteItemRepo(db *gorm.DB) *SQLiteItemRepo {
 	repo := &SQLiteItemRepo{
 		db:     db,
-		logger: logger,
 	}
 	return repo
 }

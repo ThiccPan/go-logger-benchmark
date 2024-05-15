@@ -33,13 +33,13 @@ func main() {
 	jwtGen := helper.NewJWTGen("secret123")
 
 	// ItemRepo := repository.NewItemRepo(logger)
-	ItemRepo := repository.NewSQLiteItemRepo(logger, db)
-	ItemService := service.NewItemService(ItemRepo, logger)
-	ItemHandler := handler.NewItemHandler(ItemRepo, ItemService, logger)
+	ItemRepo := repository.NewSQLiteItemRepo(db)
+	ItemService := service.NewItemService(ItemRepo)
+	ItemHandler := handler.NewItemHandler(ItemRepo, ItemService)
 
-	AuthRepo := repository.NewSQLiteAuthRepo(logger, db)
-	AuthService := service.NewAuthService(logger, AuthRepo)
-	AuthHandler := handler.NewAuthHandler(logger, AuthService, *jwtGen)
+	AuthRepo := repository.NewSQLiteAuthRepo(db)
+	AuthService := service.NewAuthService(AuthRepo)
+	AuthHandler := handler.NewAuthHandler(AuthService, *jwtGen)
 
 	e.POST("/login", AuthHandler.LoginHandler)
 	e.POST("/register", AuthHandler.RegisterHandler)

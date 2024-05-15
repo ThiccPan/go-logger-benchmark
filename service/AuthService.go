@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/thiccpan/go-logger-benchmark/domain"
-	"github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 )
 
@@ -14,13 +13,11 @@ type AuthService interface {
 }
 
 type authService struct {
-	logger logger.Ilogger
 	repo   repository.IAuthRepository
 }
 
-func NewAuthService(logger logger.Ilogger, repo repository.IAuthRepository) *authService {
+func NewAuthService(repo repository.IAuthRepository) *authService {
 	return &authService{
-		logger: logger,
 		repo:   repo,
 	}
 }
