@@ -17,5 +17,15 @@ func InitDB() *gorm.DB {
 	// Migrate the schema
 	db.AutoMigrate(&domain.Item{})
 	db.AutoMigrate(&domain.User{})
+	sqlDB, err := db.DB()
+	if err != nil {
+		panic("failed to get database instance")
+	}
+
+	// SetMaxIdleConns sets the maximum number of connections in the idle connection pool.
+	sqlDB.SetMaxIdleConns(100)
+
+	// SetMaxOpenConns sets the maximum number of open connections to the database.
+	sqlDB.SetMaxOpenConns(100)
 	return db
 }
