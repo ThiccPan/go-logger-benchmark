@@ -5,7 +5,7 @@ import { SharedArray } from 'k6/data';
 
 export const options = {
     // A number specifying the number of VUs to run concurrently.
-    vus: 10,
+    vus: 100,
     // A string specifying the total duration of the test run.
     duration: '1m',
 };
