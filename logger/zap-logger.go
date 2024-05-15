@@ -12,7 +12,7 @@ type ZapLogger struct {
 }
 
 // logErr implements Ilogger.
-func InitZap() ZapLogger {
+func InitZap() *ZapLogger {
 	encoderCfg := zap.NewProductionEncoderConfig()
 	encoderCfg.TimeKey = "time"
 	encoderCfg.MessageKey = "message"
@@ -39,7 +39,7 @@ func InitZap() ZapLogger {
 		log: zap.Must(config.Build()),
 	}
 
-	return *logger
+	return logger
 }
 
 func (zlog ZapLogger) LogInfo(msg string, fields ...map[string]any) {
