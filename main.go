@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	defer profile.Start(profile.MemProfile, profile.ProfilePath(".")).Stop()
+	defer profile.Start(profile.MemProfile, profile.ProfilePath("./profiling/zap")).Stop()
 	logArgs := flag.String("logconf", "foo", "a string")
 	flag.Parse()
 	e := echo.New()
