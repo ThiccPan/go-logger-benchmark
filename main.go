@@ -7,15 +7,17 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/profile"
 	"github.com/thiccpan/go-logger-benchmark/app"
-	logging "github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/handler"
 	"github.com/thiccpan/go-logger-benchmark/helper"
+	logging "github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 	"github.com/thiccpan/go-logger-benchmark/service"
 )
 
 func main() {
+	defer profile.Start(profile.MemProfile, profile.ProfilePath("./profiling/logrus")).Stop()
 	logArgs := flag.String("logconf", "foo", "a string")
 	flag.Parse()
 	e := echo.New()
