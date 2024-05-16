@@ -10,7 +10,6 @@ import (
 	"github.com/thiccpan/go-logger-benchmark/app"
 	"github.com/thiccpan/go-logger-benchmark/handler"
 	"github.com/thiccpan/go-logger-benchmark/helper"
-	logging "github.com/thiccpan/go-logger-benchmark/logger"
 	"github.com/thiccpan/go-logger-benchmark/repository"
 	"github.com/thiccpan/go-logger-benchmark/service"
 )
@@ -22,10 +21,6 @@ func main() {
 
 	log.Println(*logArgs)
 	// configure logger
-	logger := initLogger(*logArgs)
-	if logger == nil {
-		log.Fatal("invalid logger package type")
-	}
 	// Initialized db conn
 	db := app.InitDB()
 
@@ -62,15 +57,4 @@ func main() {
 	r.DELETE("/:id", ItemHandler.DeleteItemHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
-}
-
-func initLogger(logArgs string) logging.Ilogger {
-	if logArgs == "zap" {
-		log.Println("using zap logger")
-		return logging.InitZap()
-	} else if logArgs == "logrus" {
-		log.Println("using logrus logger")
-		return logging.InitLogrusLogger()
-	}
-	return nil
 }

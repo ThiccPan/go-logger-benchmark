@@ -7,11 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-type LogrusLogger struct {
-	log *logrus.Logger
-}
-
-func InitLogrusLogger() *LogrusLogger {
+func InitLogrusLogger() *logrus.Logger {
 	// open logfile location
 	logFile, err := os.OpenFile(logrusLogfilePath, os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
 	if err != nil {
@@ -26,63 +22,11 @@ func InitLogrusLogger() *LogrusLogger {
 		logrus.FieldKeyMsg: "message",
 	}
 
-	logger := &LogrusLogger{
-		log: &logrus.Logger{
-			Out:       logFile,
-			Formatter: formatter,
-			Hooks:     make(logrus.LevelHooks),
-			Level:     logrus.DebugLevel,
-		},
+	logger := &logrus.Logger{
+		Out:       logFile,
+		Formatter: formatter,
+		Hooks:     make(logrus.LevelHooks),
+		Level:     logrus.DebugLevel,
 	}
 	return logger
-}
-
-func (llog *LogrusLogger) LogInfo(msg string, fields ...map[string]any) {
-	logFields := logrus.Fields{}
-	if fields != nil {
-		for k, v := range fields[0] {
-			logFields[k] = v
-		}
-	}
-	llog.log.WithFields(logFields).Info(msg)
-}
-
-func (llog *LogrusLogger) LogErr(msg string, fields ...map[string]any) {
-	logFields := logrus.Fields{}
-	if fields != nil {
-		for k, v := range fields[0] {
-			logFields[k] = v
-		}
-	}
-	llog.log.WithFields(logFields).Error(msg)
-}
-
-func (llog *LogrusLogger) LogDebug(msg string, fields ...map[string]any) {
-	logFields := logrus.Fields{}
-	if fields != nil {
-		for k, v := range fields[0] {
-			logFields[k] = v
-		}
-	}
-	llog.log.WithFields(logFields).Debug(msg)
-}
-
-func (llog *LogrusLogger) LogWarn(msg string, fields ...map[string]any) {
-	logFields := logrus.Fields{}
-	if fields != nil {
-		for k, v := range fields[0] {
-			logFields[k] = v
-		}
-	}
-	llog.log.WithFields(logFields).Warn(msg)
-}
-
-func (llog *LogrusLogger) LogFatal(msg string, fields ...map[string]any) {
-	logFields := logrus.Fields{}
-	if fields != nil {
-		for k, v := range fields[0] {
-			logFields[k] = v
-		}
-	}
-	llog.log.WithFields(logFields).Fatal(msg)
 }
