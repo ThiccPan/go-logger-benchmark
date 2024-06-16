@@ -201,6 +201,7 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 	ph.logger.Info(
 		"successfully adding new item",
 		zap.String("email", claims.Email),
+		zap.String("item_name", item.Name),
 		zap.Uint("item_id", item.ID),
 	)
 	
