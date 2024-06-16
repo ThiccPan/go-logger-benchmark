@@ -203,8 +203,8 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 	ph.logger.WithFields(logrus.Fields{
 		"email":     claims.Email,
 		"item_id":   item.ID,
-		"item_name": newItem.Name,
-	}).Info("updating item successfull")
+		"item_name": item.Name,
+	}).Info("successfully adding new item")
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "successfully adding new item",
