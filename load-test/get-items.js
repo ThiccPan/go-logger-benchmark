@@ -7,7 +7,7 @@ export const options = {
     // A number specifying the number of VUs to run concurrently.
     vus: 100,
     // A string specifying the total duration of the test run.
-    duration: '1m',
+    iterations: 3000,
 };
 
 const sharedData = new SharedArray("credentials", () => {
