@@ -8,7 +8,7 @@ export const options = {
     vus: 100,
     // A string specifying the total duration of the test run.
     // duration: '60s',
-    iterations: 1000,
+    iterations: 3000,
 };
 
 const sharedData = new SharedArray("credentials", () => {
