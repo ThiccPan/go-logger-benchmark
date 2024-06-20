@@ -17,10 +17,11 @@ import (
 
 func main() {
 	logArgs := flag.String("logconf", "foo", "a string")
+	repoArgs := flag.String("repoconf", "foo", "a string")
 	flag.Parse()
 	e := echo.New()
 
-	log.Println(*logArgs)
+	log.Println(*logArgs, repoArgs)
 	// configure logger
 	logger := logger.InitZap()
 	// Initialized db conn
@@ -29,13 +30,24 @@ func main() {
 	// init jwt helper
 	jwtGen := helper.NewJWTGen("secret123")
 
-	// ItemRepo := repository.NewItemRepo(logger)
-	ItemRepo := repository.NewSQLiteItemRepo(db)
-	ItemService := service.NewItemService(ItemRepo, logger)
-	ItemHandler := handler.NewItemHandler(ItemRepo, ItemService, logger)
+	var itemRepo repository.IItemRepo
+	if *repoArgs == "mock" {
+		itemRepo = repository.NewMockItemRepo()
+		log.Println("using mock db")
+	} else {
+		itemRepo = repository.NewSQLiteItemRepo(db)
+	}
+	ItemService := service.NewItemService(itemRepo, logger)
+	ItemHandler := handler.NewItemHandler(itemRepo, ItemService, logger)
 
-	AuthRepo := repository.NewSQLiteAuthRepo(db)
-	AuthService := service.NewAuthService(AuthRepo)
+	var authRepo repository.IAuthRepository
+	if *repoArgs == "mock" {
+		authRepo = repository.NewMockAuthRepo(db)
+		log.Println("using mock db")
+	} else {
+		authRepo = repository.NewSQLiteAuthRepo(db)
+	}
+	AuthService := service.NewAuthService(authRepo)
 	AuthHandler := handler.NewAuthHandler(AuthService, *jwtGen)
 
 	e.POST("/login", AuthHandler.LoginHandler)
