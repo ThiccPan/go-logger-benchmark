@@ -39,13 +39,13 @@ func (ph *ItemHandler) GetItemsHandler(c echo.Context) error {
 
 	items, err := ph.service.GetItems()
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+		ph.logger.Info("error retrieving items")
+		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"error": err.Error(),
 		})
 	}
-	// ph.logger.LogInfo("fetching all items successfull", map[string]any{
-	// 	"email": claims.Email,
-	// })
+
+	// cetak pesan log dengan field email,
 	ph.logger.WithFields(logrus.Fields{
 		"email": claims.Email,
 	}).Info("fetching all items successfull")
@@ -60,8 +60,7 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		// ph.logger.LogInfo("failed to convert id")
-		ph.logger.Info("getting item successfull")
+		ph.logger.Info("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
 		})
@@ -69,15 +68,13 @@ func (ph *ItemHandler) GetItemHandler(c echo.Context) error {
 
 	item, err := ph.service.GetItem(uint(id))
 	if err != nil {
+		ph.logger.Info("error retrieving items")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	// ph.logger.LogInfo("getting item successfull", map[string]any{
-	// 	"email":   claims.Email,
-	// 	"item_id": id,
-	// })
+	// cetak pesan log dengan field email, item_id
 	ph.logger.WithFields(logrus.Fields{
 		"email":   claims.Email,
 		"item_id": id,
@@ -94,7 +91,6 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		// ph.logger.LogInfo("failed to convert id")
 		ph.logger.Info("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
@@ -104,6 +100,7 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	request := &updateItemRequest{}
 	err = c.Bind(request)
 	if err != nil {
+		ph.logger.Info("bad request")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
@@ -115,16 +112,13 @@ func (ph *ItemHandler) UpdateItemHandler(c echo.Context) error {
 	}
 	item, err := ph.service.UpdateItem(uint(id), newItem)
 	if err != nil {
+		ph.logger.Info("error updating items")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	// ph.logger.LogInfo("updating item successfull", map[string]any{
-	// 	"email":     claims.Email,
-	// 	"item_id":   id,
-	// 	"item_name": newItem.Name,
-	// })
+	// cetak pesan log dengan field email, item_id, item_name
 	ph.logger.WithFields(logrus.Fields{
 		"email":     claims.Email,
 		"item_id":   id,
@@ -142,7 +136,6 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		// ph.logger.LogInfo("failed to convert id")
 		ph.logger.Info("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": "invalid id, use integer id",
@@ -151,15 +144,13 @@ func (ph *ItemHandler) DeleteItemHandler(c echo.Context) error {
 
 	item, err := ph.service.DeleteItem(uint(id))
 	if err != nil {
+		ph.logger.Info("error deleting items")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	// ph.logger.LogInfo("updating item successfull", map[string]any{
-	// 	"email":   claims.Email,
-	// 	"item_id": id,
-	// })
+	// cetak pesan log dengan field email, item_id
 	ph.logger.WithFields(logrus.Fields{
 		"email":   claims.Email,
 		"item_id": id,
@@ -177,12 +168,12 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 	productRequest := &addItemRequest{}
 	err := c.Bind(productRequest)
 	if err != nil {
+		ph.logger.Info("failed to convert id")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	// add item to productRepo
 	newItem := domain.Item{
 		Name:  productRequest.Name,
 		Stock: productRequest.Stock,
@@ -190,16 +181,13 @@ func (ph *ItemHandler) AddItemHandler(c echo.Context) error {
 
 	item, err := ph.service.AddItem(newItem)
 	if err != nil {
+		ph.logger.Info("error adding items")
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"error": err.Error(),
 		})
 	}
 
-	// ph.logger.LogInfo("successfully adding new item", map[string]any{
-	// 	"email":     claims.Email,
-	// 	"item_id":   item.ID,
-	// 	"item_name": item.Name,
-	// })
+	// cetak pesan log dengan field email, item_id, item_name
 	ph.logger.WithFields(logrus.Fields{
 		"email":     claims.Email,
 		"item_id":   item.ID,
