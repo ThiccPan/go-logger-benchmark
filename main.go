@@ -16,12 +16,11 @@ import (
 )
 
 func main() {
-	logArgs := flag.String("logconf", "foo", "a string")
 	repoArgs := flag.String("repoconf", "foo", "a string")
 	flag.Parse()
 	e := echo.New()
 
-	log.Println(*logArgs, repoArgs)
+	log.Println(repoArgs)
 	// configure logger
 	logger := logging.InitLogrusLogger()
 	// Initialized db conn
